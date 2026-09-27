@@ -1,7 +1,7 @@
 using System.Numerics;
-using Yggdrasilnet.Server.Simulation.World.System.Physic.Steering;
+using Yggdrasilnet.Server.Simulation.World.System.Steering;
 
-namespace Yggdrasilnet.Server.Simulation.World.System.Steering.Behaviors;
+namespace Yggdrasilnet.Server.Simulation.World.System.Physic.Steering.Behaviors;
 
 internal sealed class RoamConstraintSteeringBehavior : ISteeringBehavior {
     public void Apply(SteeringContext context, SteeringAgent agent, ref Vector2 steer) {

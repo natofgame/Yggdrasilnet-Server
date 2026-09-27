@@ -21,6 +21,7 @@ public sealed class Entity {
         PreviousPosition = position;
         
         AddComponent(new DirectionComponent());
+        AddComponent(new TargetComponent());
     }
 
     public void AddComponent(IComponent component) {

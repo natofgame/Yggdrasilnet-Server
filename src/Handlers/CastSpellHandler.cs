@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using LiteNetLib;
 using Yggdrasilnet.Gameplay.Enums;
+using Yggdrasilnet.Network.Enums;
 using Yggdrasilnet.Network.Packet;
 using Yggdrasilnet.Network.Packet.Packets;
 using Yggdrasilnet.Server.Simulation;

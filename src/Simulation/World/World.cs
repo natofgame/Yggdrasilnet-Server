@@ -88,8 +88,8 @@ public sealed class World(
         AddSystem(new SteeringSystem());
         AddSystem(new MovementSystem());
         AddSystem(new CollisionSystem());
+        AddSystem(new TargetingSystem());
         
-
         AddSystem(new AiSystem());
         
         var phaseSystem = new SpellPhaseSystem(_spellDefinitions);

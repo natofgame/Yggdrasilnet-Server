@@ -1,6 +1,7 @@
 using System.Numerics;
 using Yggdrasilnet.Server.Simulation.World.Component;
 using Yggdrasilnet.Server.Simulation.World.System.Physic.Steering;
+using Yggdrasilnet.Server.Simulation.World.System.Physic.Steering.Behaviors;
 using Yggdrasilnet.Server.Simulation.World.System.Steering.Behaviors;
 
 namespace Yggdrasilnet.Server.Simulation.World.System.Steering;

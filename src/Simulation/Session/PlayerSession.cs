@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using LiteNetLib;
 using Yggdrasilnet.Gameplay.Enums;
+using Yggdrasilnet.Network.Enums;
 
 namespace Yggdrasilnet.Server.Simulation.Session;
 
@@ -14,6 +15,7 @@ public sealed class SentEntityState {
     public Vector3 Velocity { get; set; }
     public SentHealthState? Health { get; set; }
     public SentActionState? Action { get; set; }
+    public int? TargetId;
     public long LastSentTick { get; set; }
     public long LastObservedTick { get; set; }
     public long LastFullSentTick { get; set; }

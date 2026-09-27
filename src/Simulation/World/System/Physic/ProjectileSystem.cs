@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using Yggdrasilnet.Gameplay.Enums;
 using Yggdrasilnet.Maths.Collision;
+using Yggdrasilnet.Network.Enums;
 using Yggdrasilnet.Server.Simulation.Content;
 using Yggdrasilnet.Server.Simulation.Content.Spell;
 using Yggdrasilnet.Server.Simulation.Content.Spell.Definitions;

@@ -28,6 +28,7 @@ public sealed class SnapshotBuilder(World.World world) {
     private const float VelocityDeltaThreshold = 0.05f;
     private const float PositionDeltaThresholdSquared = PositionDeltaThreshold * PositionDeltaThreshold;
     private const float VelocityDeltaThresholdSquared = VelocityDeltaThreshold * VelocityDeltaThreshold;
+    private const int SnapshotTargetComponentBytes = 25;
 
     private static readonly SnapshotDistanceTier[] SnapshotDistanceTiers = [
         new(12f),
@@ -272,6 +273,12 @@ public sealed class SnapshotBuilder(World.World world) {
                     X  = direction.X,
                     Z  = direction.Z,
                 },
+                Network.Packet.Snapshot.Components.TargetComponent target => new Network.Packet.Snapshot.Components.TargetComponent() {
+                    EntityId = target.EntityId,
+                    Distance = target.Distance,
+                    Direction = target.Direction,
+                    HealthRatio = target.HealthRatio
+                },
                 _ => networked
             };
             snapshot.Components.Add(copy);
@@ -283,6 +290,7 @@ public sealed class SnapshotBuilder(World.World world) {
                     SnapshotActionComponentBytes + Encoding.UTF8.GetByteCount(action.SpellId),
                 Network.Packet.Snapshot.Components.CollisionComponent => SnapshotCollisionComponentBytes,
                 Network.Packet.Snapshot.Components.DirectionComponent => SnapshotDirectionComponentBytes,
+                Network.Packet.Snapshot.Components.TargetComponent => SnapshotTargetComponentBytes,
                 _ when copy.Type == NetworkedComponentType.Velocity => SnapshotVelocityComponentBytes,
                 _ => 0
             };
@@ -336,7 +344,9 @@ public sealed class SnapshotBuilder(World.World world) {
     }
 
     private static bool HasCombatChange(World.Entity entity, SentEntityState state) {
-        return ReadHealthState(entity) != state.Health || ReadActionState(entity) != state.Action;
+        return ReadHealthState(entity) != state.Health
+               || ReadActionState(entity) != state.Action
+               || ReadTargetState(entity) != state.TargetId;
     }
 
     private static SentHealthState? ReadHealthState(World.Entity entity) {
@@ -362,6 +372,7 @@ public sealed class SnapshotBuilder(World.World world) {
         state.Velocity = velocity;
         state.Health = ReadHealthState(entity);
         state.Action = ReadActionState(entity);
+        state.TargetId = ReadTargetState(entity);
         state.LastSentTick = tick;
         state.LastObservedTick = tick;
         if (fullSnapshot) {
@@ -464,4 +475,8 @@ public sealed class SnapshotBuilder(World.World world) {
     }
 
     private static Vector2 Flat(Vector3 position) => new(position.X, position.Z);
+    
+    private static int? ReadTargetState(World.Entity entity) {
+        return entity.TryGetComponent<TargetComponent>(out var target) ? target.EntityId : null;
+    }
 }

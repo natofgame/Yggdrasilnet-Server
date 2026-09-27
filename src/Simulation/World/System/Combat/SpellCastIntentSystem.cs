@@ -1,4 +1,5 @@
 using Yggdrasilnet.Gameplay.Enums;
+using Yggdrasilnet.Network.Enums;
 using Yggdrasilnet.Server.Simulation.Content;
 using Yggdrasilnet.Server.Simulation.Content.Spell;
 using Yggdrasilnet.Server.Simulation.Content.Spell.Definitions;
