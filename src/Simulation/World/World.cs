@@ -62,6 +62,10 @@ public sealed class World(
         return _entityManager.TryGetEntity(entityId, out entity);
     }
 
+    public bool TryGetEntityDefinitionIndex(string definitionId, out byte index) {
+        return _entityDefinitions.TryGetIndex(definitionId, out index);
+    }
+
     public IEnumerable<(Entity Entity, T Component)> Query<T>() where T : class, IComponent {
         return _queryCache.Query<T>(_entityManager);
     }

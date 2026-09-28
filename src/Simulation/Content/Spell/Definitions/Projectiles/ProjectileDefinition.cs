@@ -1,6 +1,8 @@
 ﻿namespace Yggdrasilnet.Server.Simulation.Content.Spell.Definitions.Projectiles;
 
 public sealed class ProjectileDefinition {
+    public string EntityDefinitionId { get; set; } = string.Empty;
+
     public float Speed { get; set; } = 12f;
 
     public float Lifetime { get; set; } = 2f;
@@ -15,4 +17,3 @@ public sealed class ProjectileDefinition {
 
     public ProjectileChainDefinition? Chain { get; set; }
 }
-

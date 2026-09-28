@@ -24,7 +24,6 @@ public static class SpellCastValidator {
     private static Vector3 ResolveDirection(World.World world, World.Entity caster, SpellTargeting targeting) {
         var aimRadius = SpellTargetResolver.ResolveAimRadius(targeting);
         if (TryFindNearestEnemy(world, caster, aimRadius, out var nearest)) {
-            // Parenthèses obligatoires : `with` est prioritaire sur `-`.
             var toTarget = (nearest.Position - caster.Position) with { Y = 0f };
             if (toTarget.LengthSquared() > MinDirectionSq) {
                 return Vector3.Normalize(toTarget);

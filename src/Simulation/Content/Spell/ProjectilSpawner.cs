@@ -25,7 +25,9 @@ public static class ProjectileSpawner {
 
         var chain = definition.Chain;
 
+        var definitionIndex = ResolveProjectileDefinitionIndex(world, definition.EntityDefinitionId, spell.Id, caster.DefinitionIndex);
         var entity = world.Spawn(spawnPosition);
+        entity.DefinitionIndex = definitionIndex;
         entity.AddComponent(new ProjectileComponent {
             SpellDefinitionId = spell.Id,
             Context = context with { Origin = spawnPosition },
@@ -41,6 +43,25 @@ public static class ProjectileSpawner {
             ChainDamageMultiplier = chain?.DamageMultiplierPerBounce ?? 1f,
         });
         return true;
+    }
+
+    private static byte ResolveProjectileDefinitionIndex(
+        World.World world,
+        string? configuredDefinitionId,
+        string spellId,
+        byte casterDefinitionIndex) {
+
+        if (!string.IsNullOrWhiteSpace(configuredDefinitionId) &&
+            world.TryGetEntityDefinitionIndex(configuredDefinitionId, out var configuredIndex)) {
+            return configuredIndex;
+        }
+
+        var spellSpecificId = $"{spellId}_projectile";
+        if (world.TryGetEntityDefinitionIndex(spellSpecificId, out var spellSpecificIndex)) {
+            return spellSpecificIndex;
+        }
+
+        return casterDefinitionIndex;
     }
 
     private static bool IsValid(SpellCastContext context, ProjectileDefinition definition) {
