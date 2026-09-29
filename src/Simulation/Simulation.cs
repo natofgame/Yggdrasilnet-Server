@@ -63,9 +63,5 @@ public sealed class Simulation : ISimulationContext {
         _world.Update(deltaTime);
     }
 
-    public SnapshotPacket BuildSnapshotForSession(PlayerSession session, int tickRate, bool forceFullSnapshot) {
-        return _snapshotBuilder.BuildSnapshotForSession(session, Tick, tickRate, forceFullSnapshot);
-    }
-
     internal SnapshotBuilder.BroadcastBatch BeginSnapshotBatch() => _snapshotBuilder.BeginBroadcastBatch(Tick);
 }

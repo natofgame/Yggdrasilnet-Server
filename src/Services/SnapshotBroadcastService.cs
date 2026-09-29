@@ -7,15 +7,18 @@ namespace Yggdrasilnet.Server.Services;
 public sealed class SnapshotBroadcastService(NetServer netServer, Simulation.Simulation simulation, int tickRate) {
     private const int KeyframeIntervalSeconds = 1;
     private const int SnapshotChunkTargetBytes = 1000;
-    private const int SnapshotChunkHeaderBytes = 10;
+    private const int SnapshotChunkHeaderBytes = 12;
     private const int SnapshotChunkSafetyMarginBytes = 96;
-    private const int SnapshotBaseEntityBytes = 22;
+    private const int SnapshotBaseEntityBytes = EntitySnapshot.HeaderBytes;
     private const int SnapshotVelocityComponentBytes = 13;
     private const int DespawnPacketHeaderBytes = 1 + sizeof(ushort);
 
     private uint _snapshotFrameId;
     private readonly SnapshotChunkPacket _chunk = new();
     private readonly DespawnEntitiesPacket _despawn = new();
+    
+    private readonly List<EntitySnapshot> _sendable = new();
+    private readonly List<int> _chunkEnds = new();
 
     public SnapshotBroadcastMetrics Broadcast() {
         using var batch = simulation.BeginSnapshotBatch();
@@ -72,52 +75,79 @@ public sealed class SnapshotBroadcastService(NetServer netServer, Simulation.Sim
         }
     }
 
-    private void SendSnapshotChunks(NetPeer peer, List<EntitySnapshot> entities, uint frameId, bool keyframeTick, ref SnapshotBroadcastMetrics metrics) {
-        if (entities.Count == 0) {
+  private void SendSnapshotChunks(NetPeer peer, List<EntitySnapshot> entities, uint frameId, bool keyframeTick, ref SnapshotBroadcastMetrics metrics) {
+    if (entities.Count == 0) {
+        return;
+    }
+
+    var delivery = keyframeTick ? DeliveryMethod.ReliableOrdered : DeliveryMethod.Unreliable;
+    var chunkTargetBytes = ResolveChunkTargetBytes(peer, delivery);
+    var maxEntityBudget = chunkTargetBytes - SnapshotChunkHeaderBytes;
+
+    _sendable.Clear();
+    _chunkEnds.Clear();
+
+    try {
+        // Passe 1 : filtrer les entités trop grosses et calculer les frontières de chunks.
+        var currentBytes = SnapshotChunkHeaderBytes;
+        var inChunk = 0;
+        foreach (var entity in entities) {
+            var entityBytes = EstimateEntityBytes(entity);
+            if (entityBytes > maxEntityBudget) {
+                metrics.DroppedOversizedEntities++;
+                continue;
+            }
+
+            var wouldOverflow = inChunk > 0
+                                && (currentBytes + entityBytes > chunkTargetBytes
+                                    || inChunk >= SnapshotChunkPacket.MaxEntitiesPerChunk);
+            if (wouldOverflow) {
+                _chunkEnds.Add(_sendable.Count);
+                inChunk = 0;
+                currentBytes = SnapshotChunkHeaderBytes;
+            }
+
+            _sendable.Add(entity);
+            inChunk++;
+            currentBytes += entityBytes;
+        }
+
+        if (inChunk > 0) {
+            _chunkEnds.Add(_sendable.Count);
+        }
+
+        if (_chunkEnds.Count == 0) {
             return;
         }
 
-        var delivery = keyframeTick ? DeliveryMethod.ReliableOrdered : DeliveryMethod.Unreliable;
-        var chunkTargetBytes = ResolveChunkTargetBytes(peer, delivery);
-        var maxEntityBudget = chunkTargetBytes - SnapshotChunkHeaderBytes;
-
-        _chunk.FrameId = frameId;
-        _chunk.ChunkIndex = 0;
-        _chunk.IsLastChunk = false;
-        _chunk.Entities.Clear();
-        var currentBytes = SnapshotChunkHeaderBytes;
-
-        try {
-            foreach (var entity in entities) {
-                var entityBytes = EstimateEntityBytes(entity);
-                if (entityBytes > maxEntityBudget) {
-                    metrics.DroppedOversizedEntities++;
-                    continue;
-                }
-
-                var wouldOverflow = _chunk.Entities.Count > 0
-                                    && currentBytes + entityBytes > chunkTargetBytes;
-                if (wouldOverflow) {
-                    SendChunk(peer, _chunk, delivery, ref metrics);
-                    _chunk.Entities.Clear();
-                    _chunk.ChunkIndex++;
-                    currentBytes = SnapshotChunkHeaderBytes;
-                }
-
-                _chunk.Entities.Add(entity);
-                currentBytes += entityBytes;
-            }
-
-            if (_chunk.Entities.Count <= 0) {
-                return;
-            }
-
-            _chunk.IsLastChunk = true;
-            SendChunk(peer, _chunk, delivery, ref metrics);
-        } finally {
-            _chunk.Entities.Clear();
+        if (_chunkEnds.Count > SnapshotChunkPacket.MaxChunksPerFrame) {
+            metrics.DroppedFrames++;             // le client rejetterait la frame : on ne l'envoie pas
+            return;
         }
+
+        // Passe 2 : envoyer, ChunkCount est maintenant connu.
+        _chunk.FrameId = frameId;
+        _chunk.IsKeyframe = keyframeTick;
+        _chunk.ChunkCount = (ushort)_chunkEnds.Count;
+
+        var start = 0;
+        for (var i = 0; i < _chunkEnds.Count; i++) {
+            var end = _chunkEnds[i];
+            _chunk.ChunkIndex = (ushort)i;
+            _chunk.Entities.Clear();
+            for (var j = start; j < end; j++) {
+                _chunk.Entities.Add(_sendable[j]);
+            }
+
+            SendChunk(peer, _chunk, delivery, ref metrics);
+            start = end;
+        }
+    } finally {
+        _chunk.Entities.Clear();
+        _sendable.Clear();
+        _chunkEnds.Clear();
     }
+}
 
     private static int ResolveChunkTargetBytes(NetPeer peer, DeliveryMethod delivery) {
         var maxPacketSize = peer.GetMaxSinglePacketSize(delivery);
@@ -154,4 +184,5 @@ public struct SnapshotBroadcastMetrics {
     public int DespawnPacketsSent { get; set; }
     public int DespawnEntities { get; set; }
     public bool Keyframe { get; set; }
+    public int DroppedFrames { get; set; }
 }

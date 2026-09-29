@@ -48,7 +48,7 @@ public sealed class SnapshotBuilder(World.World world) {
     private readonly Stack<List<World.Entity>> _nearbyBufferPool = new();
     private readonly List<int> _sentStatePruneBuffer = new();
     private long _interestGridBuiltAtTick = -1;
-    private readonly SnapshotPacket _broadcastPacket = new();
+    private readonly SnapshotFrame _broadcastPacket = new();
     private readonly Dictionary<int, EntitySnapshot> _broadcastEntities = new();
     private readonly List<EntitySnapshot> _broadcastSnapshotPool = new();
     private int _usedBroadcastSnapshots;
@@ -76,7 +76,7 @@ public sealed class SnapshotBuilder(World.World world) {
     ) : IDisposable {
         public IReadOnlyList<int> RemovedEntityIds => removedEntityIds;
 
-        public SnapshotPacket Build(PlayerSession session, int tickRate, bool forceFullSnapshot) {
+        public SnapshotFrame Build(PlayerSession session, int tickRate, bool forceFullSnapshot) {
             if (!builder._broadcastBatchActive || builder._broadcastBatchVersion != version) {
                 throw new ObjectDisposedException(nameof(BroadcastBatch));
             }
@@ -111,12 +111,12 @@ public sealed class SnapshotBuilder(World.World world) {
         _broadcastBatchActive = false;
     }
 
-    public SnapshotPacket BuildSnapshotForSession(PlayerSession session, long tick, int tickRate, bool forceFullSnapshot) {
+    public SnapshotFrame BuildSnapshotForSession(PlayerSession session, long tick, int tickRate, bool forceFullSnapshot) {
         return BuildSnapshot(session, tick, tickRate, forceFullSnapshot, false);
     }
 
-    private SnapshotPacket BuildSnapshot(PlayerSession session, long tick, int tickRate, bool forceFullSnapshot, bool broadcast) {
-        var packet = broadcast ? _broadcastPacket : new SnapshotPacket();
+    private SnapshotFrame BuildSnapshot(PlayerSession session, long tick, int tickRate, bool forceFullSnapshot, bool broadcast) { 
+        var packet = broadcast ? _broadcastPacket : new SnapshotFrame();
         if (broadcast) {
             packet.Entities.Clear();
         }
@@ -282,6 +282,7 @@ public sealed class SnapshotBuilder(World.World world) {
                 _ => networked
             };
             snapshot.Components.Add(copy);
+            snapshot.EstimatedBytes += EntitySnapshot.ComponentHeaderBytes;
             snapshot.EstimatedBytes += copy switch {
                 Network.Packet.Snapshot.Components.HealthComponent => SnapshotHealthComponentBytes,
                 Network.Packet.Snapshot.Components.ProjectileComponent projectile =>
