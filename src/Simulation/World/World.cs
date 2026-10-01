@@ -5,6 +5,7 @@ using Yggdrasilnet.Server.Simulation.Content;
 using ContentEntity = Yggdrasilnet.Server.Simulation.Content.Entity;
 using Yggdrasilnet.Server.Simulation.Content.Spell.Definitions;
 using Yggdrasilnet.Server.Simulation.Content.Spell.Effect;
+using Yggdrasilnet.Server.Simulation.Content.Spell.Runtime;
 using Yggdrasilnet.Server.Simulation.World.Component;
 using Yggdrasilnet.Server.Simulation.World.Managers;
 using Yggdrasilnet.Server.Simulation.World.System;
@@ -96,9 +97,11 @@ public sealed class World(
         
         AddSystem(new AiSystem());
         
+        var spellRuntime = new SpellRuntimePipeline(_spellDefinitions);
         var phaseSystem = new SpellPhaseSystem(_spellDefinitions);
+        AddSystem(new SpellRuntimeSystem(spellRuntime));
         AddSystem(phaseSystem);
-        AddSystem(new SpellCastIntentSystem(_spellDefinitions, phaseSystem));
+        AddSystem(new SpellCastIntentSystem(_spellDefinitions, phaseSystem, spellRuntime));
         AddSystem(new ProjectileSystem(new SpellEffectApplier(), _spellDefinitions));
         
         AddSystem(new DeathSystem());

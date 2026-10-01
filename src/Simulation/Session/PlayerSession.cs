@@ -27,5 +27,6 @@ public class PlayerSession(NetPeer peer, long connectedAtTick) {
     public readonly long ConnectedAtTick = connectedAtTick;
     public int EntityId { get; set; } = -1;
     public Dictionary<int, SentEntityState> LastSentEntities { get; } = new();
+    public Dictionary<string, int> LastSentSpellRuntimeVersions { get; } = new();
     public int SnapshotRoundRobinOffset { get; set; }
 }

@@ -1,6 +1,7 @@
 using LiteNetLib;
 using Yggdrasilnet.Network.Packet.Packets;
 using Yggdrasilnet.Network.Packet.Snapshot;
+using Yggdrasilnet.Server.Simulation.World.Component;
 
 namespace Yggdrasilnet.Server.Services;
 
@@ -15,6 +16,7 @@ public sealed class SnapshotBroadcastService(NetServer netServer, Simulation.Sim
 
     private uint _snapshotFrameId;
     private readonly DespawnEntitiesPacket _despawn = new();
+    private readonly SpellbookStatePacket _spellbookState = new();
 
     public SnapshotBroadcastMetrics Broadcast() {
         using var batch = simulation.BeginSnapshotBatch();
@@ -36,10 +38,12 @@ public sealed class SnapshotBroadcastService(NetServer netServer, Simulation.Sim
             SendRemovedEntities(session.Peer, batch.RemovedEntityIds, ref metrics);
             metrics.SnapshotEntities += snapshot.Entities.Count;
             if (snapshot.Entities.Count == 0) {
+                SendSpellbookState(session);
                 continue;
             }
 
             SendSnapshotChunks(session.Peer, snapshot.Entities, frameId, isKeyframeTick, ref metrics);
+            SendSpellbookState(session);
         }
 
         return metrics;
@@ -122,6 +126,54 @@ public sealed class SnapshotBroadcastService(NetServer netServer, Simulation.Sim
             NetworkedComponentType.Velocity => SnapshotVelocityComponentBytes,
             _ => 0
         });
+    }
+
+    private void SendSpellbookState(Simulation.Session.PlayerSession session) {
+        if (session.EntityId < 0 || !simulation.World.TryGetEntity(session.EntityId, out var entity)) {
+            return;
+        }
+
+        if (!entity.TryGetComponent<SpellbookComponent>(out var spellbook)) {
+            return;
+        }
+
+        _spellbookState.EntityId = entity.Id;
+        _spellbookState.Spells.Clear();
+        try {
+            for (var i = 0; i < spellbook.Spells.Count; i++) {
+                if (i > byte.MaxValue) {
+                    break;
+                }
+
+                var spellId = spellbook.Spells[i];
+                if (!spellbook.Runtime.Spells.TryGetValue(spellId, out var runtimeState)) {
+                    continue;
+                }
+
+                if (session.LastSentSpellRuntimeVersions.TryGetValue(spellId, out var lastVersion)
+                    && lastVersion == runtimeState.Version) {
+                    continue;
+                }
+
+                _spellbookState.Spells.Add(new SpellSlotRuntimeNetState {
+                    SlotIndex = (byte)i,
+                    SpellId = spellId,
+                    CooldownRemainingSeconds = runtimeState.CooldownRemainingSeconds,
+                    ChargesCurrent = runtimeState.ChargesCurrent,
+                    StackCount = runtimeState.StackCount,
+                    Version = runtimeState.Version
+                });
+                session.LastSentSpellRuntimeVersions[spellId] = runtimeState.Version;
+            }
+
+            if (_spellbookState.Spells.Count == 0) {
+                return;
+            }
+
+            netServer.Send(session.Peer, _spellbookState, DeliveryMethod.Unreliable);
+        } finally {
+            _spellbookState.Spells.Clear();
+        }
     }
 }
 

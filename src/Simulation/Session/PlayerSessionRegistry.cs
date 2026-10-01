@@ -19,6 +19,7 @@ public sealed class PlayerSessionRegistry {
         }
 
         session.LastSentEntities.Clear();
+        session.LastSentSpellRuntimeVersions.Clear();
         return true;
     }
 

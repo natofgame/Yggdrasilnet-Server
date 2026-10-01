@@ -1,6 +1,7 @@
 using System.Numerics;
 using Yggdrasilnet.Gameplay.Enums;
 using Yggdrasilnet.Network.Enums;
+using Yggdrasilnet.Server.Simulation.Content.Spell.Definitions.Policies;
 using Yggdrasilnet.Server.Simulation.Content.Spell.Definitions.Projectiles;
 using Yggdrasilnet.Server.Simulation.Content.Spell.Effect;
 
@@ -13,6 +14,9 @@ public sealed class SpellDefinition : IDefinition {
     public SpellTargeting Targeting { get; set; } = new(0f,  Vector3.Zero, Vector3.Zero, CollisionLayer.All);
 
     public List<SpellEffectDefinition> Effects { get; set; } = [];
+    public SpellCooldownPolicyDefinition Cooldown { get; set; } = new();
+    public SpellChargePolicyDefinition Charges { get; set; } = new();
+    public SpellStackPolicyDefinition Stacks { get; set; } = new();
 
     public bool SkipReturnPhase { get; set; } = false;
     
