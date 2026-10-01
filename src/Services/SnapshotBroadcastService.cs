@@ -14,11 +14,7 @@ public sealed class SnapshotBroadcastService(NetServer netServer, Simulation.Sim
     private const int DespawnPacketHeaderBytes = 1 + sizeof(ushort);
 
     private uint _snapshotFrameId;
-    private readonly SnapshotChunkPacket _chunk = new();
     private readonly DespawnEntitiesPacket _despawn = new();
-    
-    private readonly List<EntitySnapshot> _sendable = new();
-    private readonly List<int> _chunkEnds = new();
 
     public SnapshotBroadcastMetrics Broadcast() {
         using var batch = simulation.BeginSnapshotBatch();
@@ -65,7 +61,7 @@ public sealed class SnapshotBroadcastService(NetServer netServer, Simulation.Sim
                     continue;
                 }
 
-                netServer.Send(peer, _despawn, delivery);
+                netServer.Send(peer, _despawn);
                 metrics.DespawnPacketsSent++;
                 metrics.DespawnEntities += _despawn.EntityIds.Count;
                 _despawn.EntityIds.Clear();
@@ -75,79 +71,32 @@ public sealed class SnapshotBroadcastService(NetServer netServer, Simulation.Sim
         }
     }
 
-  private void SendSnapshotChunks(NetPeer peer, List<EntitySnapshot> entities, uint frameId, bool keyframeTick, ref SnapshotBroadcastMetrics metrics) {
-    if (entities.Count == 0) {
-        return;
-    }
-
-    var delivery = keyframeTick ? DeliveryMethod.ReliableOrdered : DeliveryMethod.Unreliable;
-    var chunkTargetBytes = ResolveChunkTargetBytes(peer, delivery);
-    var maxEntityBudget = chunkTargetBytes - SnapshotChunkHeaderBytes;
-
-    _sendable.Clear();
-    _chunkEnds.Clear();
-
-    try {
-        // Passe 1 : filtrer les entités trop grosses et calculer les frontières de chunks.
-        var currentBytes = SnapshotChunkHeaderBytes;
-        var inChunk = 0;
-        foreach (var entity in entities) {
-            var entityBytes = EstimateEntityBytes(entity);
-            if (entityBytes > maxEntityBudget) {
-                metrics.DroppedOversizedEntities++;
-                continue;
-            }
-
-            var wouldOverflow = inChunk > 0
-                                && (currentBytes + entityBytes > chunkTargetBytes
-                                    || inChunk >= SnapshotChunkPacket.MaxEntitiesPerChunk);
-            if (wouldOverflow) {
-                _chunkEnds.Add(_sendable.Count);
-                inChunk = 0;
-                currentBytes = SnapshotChunkHeaderBytes;
-            }
-
-            _sendable.Add(entity);
-            inChunk++;
-            currentBytes += entityBytes;
-        }
-
-        if (inChunk > 0) {
-            _chunkEnds.Add(_sendable.Count);
-        }
-
-        if (_chunkEnds.Count == 0) {
+    private void SendSnapshotChunks(NetPeer peer, List<EntitySnapshot> entities, uint frameId, bool keyframeTick, ref SnapshotBroadcastMetrics metrics) {
+        if (entities.Count == 0) {
             return;
         }
 
-        if (_chunkEnds.Count > SnapshotChunkPacket.MaxChunksPerFrame) {
-            metrics.DroppedFrames++;             // le client rejetterait la frame : on ne l'envoie pas
+        var delivery = keyframeTick ? DeliveryMethod.ReliableOrdered : DeliveryMethod.Unreliable;
+        var chunkTargetBytes = ResolveChunkTargetBytes(peer, delivery);
+        var chunkingResult = SnapshotChunker.Split(
+            frameId,
+            keyframeTick,
+            entities,
+            chunkTargetBytes,
+            SnapshotChunkHeaderBytes,
+            EstimateEntityBytes
+        );
+
+        metrics.DroppedOversizedEntities += chunkingResult.DroppedOversizedEntities;
+        if (chunkingResult.DroppedFrame) {
+            metrics.DroppedFrames++;
             return;
         }
 
-        // Passe 2 : envoyer, ChunkCount est maintenant connu.
-        _chunk.FrameId = frameId;
-        _chunk.IsKeyframe = keyframeTick;
-        _chunk.ChunkCount = (ushort)_chunkEnds.Count;
-
-        var start = 0;
-        for (var i = 0; i < _chunkEnds.Count; i++) {
-            var end = _chunkEnds[i];
-            _chunk.ChunkIndex = (ushort)i;
-            _chunk.Entities.Clear();
-            for (var j = start; j < end; j++) {
-                _chunk.Entities.Add(_sendable[j]);
-            }
-
-            SendChunk(peer, _chunk, delivery, ref metrics);
-            start = end;
+        foreach (var chunk in chunkingResult.Chunks) {
+            SendChunk(peer, chunk, delivery, ref metrics);
         }
-    } finally {
-        _chunk.Entities.Clear();
-        _sendable.Clear();
-        _chunkEnds.Clear();
     }
-}
 
     private static int ResolveChunkTargetBytes(NetPeer peer, DeliveryMethod delivery) {
         var maxPacketSize = peer.GetMaxSinglePacketSize(delivery);
