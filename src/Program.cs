@@ -1,5 +1,6 @@
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
+using Yggdrasilnet.Server.Plugins;
 using Yggdrasilnet.Server;
 using Yggdrasilnet.Server.Services;
 using Yggdrasilnet.Server.Services.Debug;
@@ -14,6 +15,10 @@ Log.Logger = new LoggerConfiguration()
 
 const int port = 9050;
 const int tickRate = 30;
+
+var pluginManager = new PluginManager();
+pluginManager.DiscoverAndLoad(Path.Combine(AppContext.BaseDirectory, "Plugins"));
+pluginManager.RaiseServerStarting(port, tickRate);
 
 var simulation = new Simulation();
 var netServer = new NetServer(simulation.IncomingEvents);
@@ -32,7 +37,11 @@ Console.CancelKeyPress += (_, args) => {
 };
 
 Log.Information("Game loop running at {TickRate} tps", tickRate);
-gameLoop.Run(cts.Token);
+try {
+    gameLoop.Run(cts.Token);
+} finally {
+    pluginManager.Shutdown();
+}
 
 netServer.Stop();
 Log.Information("Server stopped.");
