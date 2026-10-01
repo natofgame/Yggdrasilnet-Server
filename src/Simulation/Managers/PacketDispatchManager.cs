@@ -14,7 +14,6 @@ public sealed class PacketDispatchManager {
     public PacketDispatchManager(PlayerSimulationManager playerSimulation, DefinitionRegistry<SpellDefinition> spellDefinitions) {
         _playerSimulation = playerSimulation;
 
-        _dispatcher.Register(PacketType.PlayerConnexion, new PlayerConnexionHandler());
         _dispatcher.Register(PacketType.Input, new InputHandler());
         _dispatcher.Register(PacketType.SpawnEntities, new SpawnEntitiesHandler());
         _dispatcher.Register(PacketType.CastSpell, new CastSpellHandler(spellDefinitions));
