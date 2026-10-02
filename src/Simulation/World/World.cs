@@ -90,13 +90,12 @@ public sealed class World(
 
     public void Load() {
         AddSystem(new PlayerMovementSystem());
+        AddSystem(new AiSystem());
         AddSystem(new SteeringSystem());
         AddSystem(new MovementSystem());
         AddSystem(new CollisionSystem());
         AddSystem(new TargetingSystem());
-        
-        AddSystem(new AiSystem());
-        
+
         var spellRuntime = new SpellRuntimePipeline(_spellDefinitions);
         var phaseSystem = new SpellPhaseSystem(_spellDefinitions);
         AddSystem(new SpellRuntimeSystem(spellRuntime));

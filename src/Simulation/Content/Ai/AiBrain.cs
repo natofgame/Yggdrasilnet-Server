@@ -71,8 +71,13 @@ public static class AiBrain {
 
     private static void Reset(SteeringComponent steering) {
         steering.InputDirection = Vector2.Zero;
+        steering.MoveSpeed = 0f;
         steering.SeekWeight = 0f;
+        steering.CircleRadius = 0f;
         steering.CircleWeight = 0f;
+        steering.CircleDirection = 1f;
+        steering.WanderWeight = 0f;
+        steering.WanderJitter = 1f;
         steering.HasDash = false;
     }
 

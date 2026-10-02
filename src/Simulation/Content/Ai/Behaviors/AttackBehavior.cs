@@ -6,6 +6,10 @@ public sealed class AttackBehavior : AiBehavior {
     public float Speed { get; set; } = 7f;
     public float CastRange { get; set; } = 1.2f;
     public float CircleWeight { get; set; } = 0.3f;
+    public float ArrivalBand { get; set; } = 2f;
+    public float MinApproachFactor { get; set; } = 0.35f;
+    public float CircleStartDistance { get; set; } = 1.6f;
+    public float CircleNearRangeFactor { get; set; } = 0.15f;
     public byte SpellIndex { get; set; }
     public float MinCooldown { get; set; } = 5f;
     public float MaxCooldown { get; set; } = 10f;
@@ -33,9 +37,19 @@ public sealed class AttackBehavior : AiBehavior {
             return;
         }
 
-        steering.SeekWeight = 1f;
-        steering.CircleWeight = CircleWeight;
-        steering.MoveSpeed = Speed;
+        var planar = new System.Numerics.Vector2(ai.TargetDirection.X, ai.TargetDirection.Z);
+        if (planar.LengthSquared() > 0.0001f) {
+            steering.InputDirection = System.Numerics.Vector2.Normalize(planar);
+        }
+
+        var overRange = MathF.Max(0f, ai.TargetDistance - CastRange);
+        var speedFactor = Math.Clamp(overRange / MathF.Max(0.05f, ArrivalBand), MinApproachFactor, 1f);
+        steering.MoveSpeed = Speed * speedFactor;
+
+        steering.SeekWeight = 0f;
+        steering.CircleWeight = ai.TargetDistance > CircleStartDistance
+            ? 0f
+            : CircleWeight * CircleNearRangeFactor;
     }
 
     private float ResolveCooldown(float aggressivity) {

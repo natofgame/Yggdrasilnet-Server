@@ -159,7 +159,10 @@ internal sealed class SteeringContext {
         var (centerX, centerY) = GetCellCoordinates(agent.Position, CellSize);
         var cellRadius = (int)MathF.Ceiling(agent.Steering.AvoidRadius / CellSize);
         var avoidRadiusSquared = agent.Steering.AvoidRadius * agent.Steering.AvoidRadius;
-        var processedNeighbors = 0;
+        Span<float> nearestDistances = stackalloc float[SteeringConstants.MaxNeighborsPerEntity];
+        Span<Vector2> nearestAway = stackalloc Vector2[SteeringConstants.MaxNeighborsPerEntity];
+        var nearestCount = 0;
+
         for (var y = centerY - cellRadius; y <= centerY + cellRadius; y++) {
             for (var x = centerX - cellRadius; x <= centerX + cellRadius; x++) {
                 if (!_steeringGrid.TryGetValue(GetCellKey(x, y), out var bucket)) {
@@ -171,11 +174,6 @@ internal sealed class SteeringContext {
                         continue;
                     }
 
-                    processedNeighbors++;
-                    if (processedNeighbors > SteeringConstants.MaxNeighborsPerEntity) {
-                        return;
-                    }
-
                     var away = agent.Position - other.Position;
                     var distanceSquared = away.LengthSquared();
                     if (!(distanceSquared > SteeringConstants.MinDistanceSquared) ||
@@ -183,12 +181,38 @@ internal sealed class SteeringContext {
                         continue;
                     }
 
-                    var inverseDistance = 1f / MathF.Sqrt(distanceSquared);
-                    var distance = distanceSquared * inverseDistance;
-                    var strength = (agent.Steering.AvoidRadius - distance) / agent.Steering.AvoidRadius;
-                    steer += away * inverseDistance * strength * agent.Steering.AvoidWeight;
+                    if (nearestCount < SteeringConstants.MaxNeighborsPerEntity) {
+                        nearestDistances[nearestCount] = distanceSquared;
+                        nearestAway[nearestCount] = away;
+                        nearestCount++;
+                        continue;
+                    }
+
+                    var farthestIndex = 0;
+                    var farthestDistance = nearestDistances[0];
+                    for (var i = 1; i < nearestCount; i++) {
+                        if (nearestDistances[i] > farthestDistance) {
+                            farthestDistance = nearestDistances[i];
+                            farthestIndex = i;
+                        }
+                    }
+
+                    if (distanceSquared >= farthestDistance) {
+                        continue;
+                    }
+
+                    nearestDistances[farthestIndex] = distanceSquared;
+                    nearestAway[farthestIndex] = away;
                 }
             }
+        }
+
+        for (var i = 0; i < nearestCount; i++) {
+            var distanceSquared = nearestDistances[i];
+            var inverseDistance = 1f / MathF.Sqrt(distanceSquared);
+            var distance = distanceSquared * inverseDistance;
+            var strength = (agent.Steering.AvoidRadius - distance) / agent.Steering.AvoidRadius;
+            steer += nearestAway[i] * inverseDistance * strength * agent.Steering.AvoidWeight;
         }
     }
 

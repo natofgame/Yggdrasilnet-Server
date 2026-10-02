@@ -24,6 +24,7 @@ public sealed class EntityFactory {
             ContentEntity.InputComponentDefinition input => new InputComponent { Speed =  input.Speed },
             ContentEntity.SteeringComponentDefinition steering => new SteeringComponent {
                 MoveSpeed = steering.Speed,
+                HasPunch = steering.HasPunch,
                 AvoidRadius = steering.AvoidRadius,
                 AvoidWeight = steering.AvoidWeight,
                 SeekWeight = steering.SeekWeight,

@@ -43,4 +43,6 @@ public class AiComponent : IComponent {
     public Vector3? WanderTarget;
     public float WanderIdleTimer;
     public int? SocialTargetId;
+    public float HoldOrbitDirection;
+    public float HoldRadiusOffset;
 }

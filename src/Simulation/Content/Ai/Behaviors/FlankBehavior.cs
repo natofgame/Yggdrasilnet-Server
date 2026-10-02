@@ -7,12 +7,12 @@ public sealed class FlankBehavior : AiBehavior {
     public float Distance { get; set; } = 3f;
 
     public override float Score(AiComponent ai) {
-        if (!ai.HasTarget) {
+        if (!ai.HasTarget || !ai.HasAttackToken) {
             return 0f;
         }
 
         var curiosity = Clamp01(ai.Curiosity / 10f);
-        return curiosity * Clamp01(ai.TargetDistance / 10f);
+        return 0.25f * curiosity * Clamp01(ai.TargetDistance / 10f);
     }
 
     public override void Tick(World.World world, World.Entity entity, AiComponent ai, SteeringComponent steering, float dt) {

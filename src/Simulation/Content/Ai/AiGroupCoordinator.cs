@@ -8,13 +8,16 @@ public sealed class AiGroupCoordinator {
     public float TokenLease { get; set; } = 4f;
     public float MinGap { get; set; } = 0.4f;
     public float MaxGap { get; set; } = 1.2f;
+    public float SlotAngleJitterFactor { get; set; } = 0.35f;
+    public float SlotRadiusRingStep { get; set; } = 0.5f;
+    public float SlotRadiusJitter { get; set; } = 0.45f;
 
     private readonly record struct Member(World.Entity Entity, AiComponent Ai);
 
     private readonly Dictionary<int, List<Member>> _groups = new();
     private readonly Dictionary<int, float> _gapTimers = new();
     private readonly List<int> _staleKeys = new();
-    private readonly List<(float Rel, AiComponent Ai)> _sorted = new();
+    private readonly List<Member> _orderedMembers = new();
 
     public void Update(World.World world, float dt) {
         foreach (var list in _groups.Values) {
@@ -54,7 +57,7 @@ public sealed class AiGroupCoordinator {
         _gapTimers.TryGetValue(targetId, out var gap);
         gap = MathF.Max(0f, gap - dt);
 
-        AssignSlots(members);
+        AssignSlots(targetId, members);
 
         var maxAttackers = Math.Clamp((members.Count + 1) / 2, 1, MaxAttackersPerTarget);
         var holders = 0;
@@ -111,29 +114,30 @@ public sealed class AiGroupCoordinator {
         _gapTimers[targetId] = gap;
     }
 
-    private void AssignSlots(List<Member> members) {
-        var anchor = members[0];
-        foreach (var m in members) {
-            if (m.Entity.Id < anchor.Entity.Id) {
-                anchor = m;
-            }
-        }
+    private void AssignSlots(int targetId, List<Member> members) {
+        _orderedMembers.Clear();
+        _orderedMembers.AddRange(members);
+        _orderedMembers.Sort((a, b) => a.Entity.Id.CompareTo(b.Entity.Id));
 
-        var anchorAngle = AngleFromTarget(anchor.Ai);
+        var anchorAngle = AngleFromTarget(_orderedMembers[0].Ai);
+        var step = MathF.Tau / _orderedMembers.Count;
+        var jitterFactor = Math.Clamp(SlotAngleJitterFactor, 0f, 0.45f);
+        var ringStep = MathF.Max(0f, SlotRadiusRingStep);
+        var radiusJitter = MathF.Max(0f, SlotRadiusJitter);
 
-        _sorted.Clear();
-        foreach (var m in members) {
-            var rel = (AngleFromTarget(m.Ai) - anchorAngle) % MathF.Tau;
-            if (rel < 0f) {
-                rel += MathF.Tau;
-            }
-            _sorted.Add((rel, m.Ai));
-        }
-        _sorted.Sort((a, b) => a.Rel.CompareTo(b.Rel));
+        for (var i = 0; i < _orderedMembers.Count; i++) {
+            var member = _orderedMembers[i];
+            var entityId = member.Entity.Id;
+            var angleNoise = Hash01((uint)entityId, (uint)targetId, 1);
+            var radiusNoise = Hash01((uint)entityId, (uint)targetId, 2);
 
-        var step = MathF.Tau / _sorted.Count;
-        for (var i = 0; i < _sorted.Count; i++) {
-            _sorted[i].Ai.SlotAngle = anchorAngle + i * step;
+            var angleJitter = (angleNoise * 2f - 1f) * step * jitterFactor;
+            member.Ai.SlotAngle = WrapAngle(anchorAngle + i * step + angleJitter);
+
+            var ringOffset = ((i % 3) - 1) * ringStep;
+            var randomRadiusOffset = (radiusNoise * 2f - 1f) * radiusJitter;
+            member.Ai.HoldRadiusOffset = ringOffset + randomRadiusOffset;
+            member.Ai.HoldOrbitDirection = ((entityId + targetId) & 1) == 0 ? 1f : -1f;
         }
     }
 
@@ -144,5 +148,25 @@ public sealed class AiGroupCoordinator {
         ai.HasAttackToken = false;
         ai.TokenTimer = 0f;
         ai.TokenWait = 0f;
+    }
+
+    private static float Hash01(uint entityId, uint targetId, uint salt) {
+        var x = entityId;
+        x ^= targetId * 0x9E3779B9u;
+        x ^= salt * 0x85EBCA6Bu;
+        x ^= x >> 16;
+        x *= 0x7FEB352Du;
+        x ^= x >> 15;
+        x *= 0x846CA68Bu;
+        x ^= x >> 16;
+        return x / (float)uint.MaxValue;
+    }
+
+    private static float WrapAngle(float angle) {
+        angle %= MathF.Tau;
+        if (angle < 0f) {
+            angle += MathF.Tau;
+        }
+        return angle;
     }
 }

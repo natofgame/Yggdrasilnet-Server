@@ -29,6 +29,7 @@ public sealed class InputComponentDefinition : EntityComponentDefinition {
 
 public sealed class SteeringComponentDefinition : EntityComponentDefinition {
     public float Speed { get; set; }
+    public bool HasPunch { get; set; }
     public float AvoidRadius { get; set; }
     public float AvoidWeight { get; set; } = 1f;
     public float SeekWeight { get; set; } = 1f;
