@@ -1,0 +1,57 @@
+{
+  "id": "fireball",
+  "components": {
+    "meta": {
+      "type": "projectile",
+      "skipReturnPhase": false,
+      "castMoveSpeedReductionPercent": 0.5
+    },
+    "timing": {
+      "anticipation": 0.4,
+      "strike": 0.3,
+      "impact": 0.0,
+      "return": 0.2
+    },
+    "cooldown": {
+      "type": "fixed",
+      "durationSeconds": 1.5
+    },
+    "effects": {
+      "effects": [
+        {
+          "type": "damage",
+          "target": "target",
+          "amount": 10.0
+        },
+        {
+          "type": "punch",
+          "target": "target",
+          "amount": 20.0
+        },
+        {
+          "type": "damage",
+          "target": "aoe",
+          "amount": 6.0
+        },
+        {
+          "type": "punch",
+          "target": "aoe",
+          "amount": 10.0
+        }
+      ]
+    },
+    "projectile": {
+      "entityDefinitionId": "fireball",
+      "speed": 22.0,
+      "lifetime": 2.5,
+      "maxHits": 1,
+      "spawnForward": 0.3,
+      "spawnHeight": 0,
+      "autoTargetEnabled": true,
+      "autoTargetInfluence": 1.2,
+      "autoTargetRange": 12.0,
+      "areaDamageEnabled": true,
+      "areaDamageRadius": 2
+    }
+  }
+}

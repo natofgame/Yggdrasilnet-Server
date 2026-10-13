@@ -1,0 +1,45 @@
+{
+  "id": "slime_melee",
+  "components": {
+    "meta": {
+      "type": "melee"
+    },
+    "timing": {
+      "anticipation": 0.3,
+      "strike": 0.12,
+      "impact": 0.12,
+      "return": 0.4
+    },
+    "targeting": {
+      "range": 1,
+      "hitBoxMinX": -3.0,
+      "hitBoxMinY": -1,
+      "hitBoxMinZ": -3.0,
+      "hitBoxMaxX": 3.0,
+      "hitBoxMaxY": 2,
+      "hitBoxMaxZ": 3.0,
+      "cardinalHitBoxMinX": -3.5,
+      "cardinalHitBoxMinY": -1,
+      "cardinalHitBoxMinZ": -3.0,
+      "cardinalHitBoxMaxX": 3.5,
+      "cardinalHitBoxMaxY": 2,
+      "cardinalHitBoxMaxZ": 3.0
+    },
+    "effects": {
+      "effects": [
+        {
+          "type": "damage",
+          "target": "target",
+          "amount": 15
+        },
+        {
+          "type": "dash",
+          "target": "self",
+          "amount": 25,
+          "duration": 0.2,
+          "activeOnAnticipation": true
+        }
+      ]
+    }
+  }
+}

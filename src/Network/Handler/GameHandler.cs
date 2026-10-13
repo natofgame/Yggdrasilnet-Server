@@ -1,0 +1,52 @@
+using Serilog;
+using Yggdrasilnet.NetworkV4.Packets;
+using Yggdrasilnet.Server.Core.Commands;
+using Yggdrasilnet.Server.Core.Events.Events;
+using Yggdrasilnet.Server.Network.Services;
+using Yggdrasilnet.Server.Network.Session;
+using Yggdrasilnet.Server.Runtime;
+using Yggdrasilnet.Server.Runtime.Services;
+
+namespace Yggdrasilnet.Server.Network.Handler;
+
+public sealed class GameHandler(
+    SimulationEngine runtime,
+    GameSession session,
+    PlayerService playerService) : AbstractGamePacketHandler {
+    public override void Handle(RequestProtocolPacket packet) {
+        Log.Debug("RequestProtocol ignored in game phase for {EndPoint}", session.Peer.Address);
+    }
+
+    public override void Handle(InputPacket packet) {
+        playerService.ApplyInput(session, packet.MoveX, packet.MoveZ, packet.Sequence);
+    }
+
+    public override void Handle(CastSpellPacket packet) {
+        if (!session.TryGetEntityBinding(out var entityId, out string? _)) {
+            Log.Debug("CastSpell from {EndPoint} ignored: no bound entity.", session.Peer.Address);
+            return;
+        }
+
+        runtime.Publish(new SpellCastRequestEvent(entityId, packet.SpellIndex));
+
+        Log.Debug("CastSpell from {EndPoint}: slot={SpellIndex}",
+            session.Peer.Address, packet.SpellIndex);
+    }
+
+    public override void Handle(ProtocolAcceptedPacket packet) {
+        Log.Debug("ProtocolAccepted received from {EndPoint} and ignored.", session.Peer.Address);
+    }
+
+    public override void Handle(CommandPacket packet) {
+        session.TryGetEntityBinding(out var entityId, out var dimensionName);
+
+        var source = new CommandSource {
+            ExecutorEntityId = entityId,
+            Dimension = runtime.World.GetDimension(dimensionName ?? string.Empty),
+            PermissionLevel = 0,
+            SendFeedback = msg => Log.Information("[{EndPoint}] {Message}", session.Peer.Address, msg)
+        };
+
+        runtime.CommandFactory.Execute(packet.Command, source);
+    }
+}
