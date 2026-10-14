@@ -1,6 +1,6 @@
 using System.Text.Json;
+using Yggdrasilnet.Server.Core.Behavior.Behaviors.Entity;
 using Yggdrasilnet.Server.Core.Behavior.Core;
-using Yggdrasilnet.Server.Core.Behavior.Impl;
 
 namespace Yggdrasilnet.Server.Core.Behavior.Registry;
 

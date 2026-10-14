@@ -1,15 +1,15 @@
 using Yggdrasilnet.NetworkV4.Packets;
 using Yggdrasilnet.Server.Network.Session;
 
-namespace Yggdrasilnet.Server.Runtime;
+namespace Yggdrasilnet.Server.Core.Registry;
 
-public class EntityDefinitionRegistry {
+public class EntityRegistry {
     private readonly Dictionary<string, byte> _definitionIds = new(StringComparer.OrdinalIgnoreCase);
 
-    private readonly SimulationEngine _simulationEngine;
+    private readonly Simulation _simulation;
 
-    public EntityDefinitionRegistry(SimulationEngine simulationEngine) {
-        _simulationEngine = simulationEngine;
+    public EntityRegistry(Simulation simulation) {
+        _simulation = simulation;
     }
 
     public int DefinitionVersion { get; private set; }
@@ -23,7 +23,7 @@ public class EntityDefinitionRegistry {
         foreach (var (definitionId, id) in _definitionIds.OrderBy(entry => entry.Value))
             packet.Definitions.Add(new EntityDefinitionEntry(id, definitionId));
 
-        _simulationEngine.Network.Send(session, packet);
+        _simulation.Network.Send(session, packet);
         session.SnapshotDefinitionsVersion = DefinitionVersion;
     }
 

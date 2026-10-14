@@ -1,16 +1,16 @@
 using Serilog;
 using Yggdrasilnet.NetworkV4.Packets;
+using Yggdrasilnet.Server.Core;
 using Yggdrasilnet.Server.Core.Commands;
 using Yggdrasilnet.Server.Core.Events.Events;
+using Yggdrasilnet.Server.Core.Services;
 using Yggdrasilnet.Server.Network.Services;
 using Yggdrasilnet.Server.Network.Session;
-using Yggdrasilnet.Server.Runtime;
-using Yggdrasilnet.Server.Runtime.Services;
 
 namespace Yggdrasilnet.Server.Network.Handler;
 
 public sealed class GameHandler(
-    SimulationEngine runtime,
+    Simulation runtime,
     GameSession session,
     PlayerService playerService) : AbstractGamePacketHandler {
     public override void Handle(RequestProtocolPacket packet) {

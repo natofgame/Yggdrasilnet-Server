@@ -2,15 +2,8 @@ using System.Numerics;
 using Yggdrasilnet.Server.Core.Behavior.Core;
 using Yggdrasilnet.Server.Core.World.Entities.Components.Combat;
 
-namespace Yggdrasilnet.Server.Core.Behavior.Impl;
+namespace Yggdrasilnet.Server.Core.Behavior.Behaviors.Entity;
 
-/// <summary>
-///     Authoring JSON du CombatComponent : liste des sorts assignes par slot
-///     (ex: "spells": ["fireball", "", "dash"]). Le runtime (cooldown/charges/stacks) part
-///     toujours a zero/defaut ; l'initialisation des charges (StartFull) est faite
-///     paresseusement par SpellCastSystem au premier tick, car elle depend du behavior
-///     "charges" du sort (non resolu ici).
-/// </summary>
 public sealed class CombatComponentBehavior : ComponentBehavior<CombatComponent> {
     public string[] Spells { get; set; } = [];
 

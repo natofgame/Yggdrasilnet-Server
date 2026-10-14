@@ -1,10 +1,20 @@
 using System.Diagnostics;
+using Yggdrasilnet.Server.Core;
 using Yggdrasilnet.Server.Network;
-using Yggdrasilnet.Server.Runtime;
 
-namespace Yggdrasilnet.Server.Hosting;
+namespace Yggdrasilnet.Server.Bootstrap;
 
-public sealed class GameLoop(ServerTransport server, SimulationEngine simulation, int tickRate) {
+/// <summary>
+///  The game loop.
+/// </summary>
+/// <param name="server"></param>
+/// <param name="simulation"></param>
+/// <param name="tickRate"></param>
+public sealed class GameLoop(ServerTransport server, Simulation simulation, int tickRate) {
+    /// <summary>
+    ///  Run the game loop.
+    /// </summary>
+    /// <param name="token"></param>
     public void Run(CancellationToken token) {
         var dt = 1f / tickRate;
         var minDt = dt * 0.5f;

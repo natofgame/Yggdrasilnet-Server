@@ -3,7 +3,7 @@ using Yggdrasilnet.Server.Core.Behavior.Core;
 using Yggdrasilnet.Server.Core.World.Entities.Components;
 using Yggdrasilnet.Server.Core.World.Entities.Components.Living;
 
-namespace Yggdrasilnet.Server.Core.Behavior.Impl;
+namespace Yggdrasilnet.Server.Core.Behavior.Behaviors.Entity;
 
 public sealed class LivingComponentBehavior : ComponentBehavior<LivingComponent> {
     public float Max { get; set; } = 100f;

@@ -1,17 +1,18 @@
 using System.Numerics;
 using Yggdrasilnet.NetworkV4.Packets;
 using Yggdrasilnet.Server.Core.Events.Events;
+using Yggdrasilnet.Server.Core.Registry;
 using Yggdrasilnet.Server.Core.World;
 using Yggdrasilnet.Server.Network.Services;
 using Yggdrasilnet.Server.Network.Session;
 
-namespace Yggdrasilnet.Server.Runtime.Services;
+namespace Yggdrasilnet.Server.Core.Services;
 
 public sealed class PlayerService(
     IWorld world,
     SessionRegistry sessions,
     NetworkService network,
-    EntityDefinitionRegistry entityDefinitions) {
+    EntityRegistry entityRegistry) {
     public void EnterGame(GameSession session) {
         if (session.ControlledEntityId is not null) {
             return;
@@ -22,7 +23,7 @@ public sealed class PlayerService(
         session.MarkReady();
 
         if (world.TryResolveEntity(player.UniqueId, out var entity) && entity is not null) {
-            entityDefinitions.EnsureDefinitionId(entity.Id);
+            entityRegistry.EnsureDefinitionId(entity.Id);
         }
 
         network.Send(session, new PlayerConnexionPacket {
@@ -31,7 +32,7 @@ public sealed class PlayerService(
             EntityId = player.UniqueId
         });
 
-        entityDefinitions.SendDefinitions(session);
+        entityRegistry.SendDefinitions(session);
 
         world.Events.Post(new PlayerConnexionEvent(
             session.Peer.Address.ToString(),

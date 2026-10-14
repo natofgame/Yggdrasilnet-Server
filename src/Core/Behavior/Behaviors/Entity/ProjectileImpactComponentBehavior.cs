@@ -3,7 +3,7 @@ using Yggdrasilnet.Server.Core.Behavior.Core;
 using Yggdrasilnet.Server.Core.World.Entities.Components.Collision;
 using Yggdrasilnet.Server.Core.World.Entities.Components.Projectile;
 
-namespace Yggdrasilnet.Server.Core.Behavior.Impl;
+namespace Yggdrasilnet.Server.Core.Behavior.Behaviors.Entity;
 
 public sealed class ProjectileImpactComponentBehavior : ComponentBehavior<ProjectileImpactComponent> {
     public float Damage { get; set; } = 10f;

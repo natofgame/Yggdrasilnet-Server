@@ -1,14 +1,14 @@
 ﻿using Serilog;
 using Yggdrasilnet.NetworkV4.Packets;
+using Yggdrasilnet.Server.Core;
+using Yggdrasilnet.Server.Core.Services;
 using Yggdrasilnet.Server.Network.Services;
 using Yggdrasilnet.Server.Network.Session;
-using Yggdrasilnet.Server.Runtime;
-using Yggdrasilnet.Server.Runtime.Services;
 
 namespace Yggdrasilnet.Server.Network.Handler;
 
 public sealed class HandshakeHandler(
-    SimulationEngine runtime,
+    Simulation runtime,
     GameSession session,
     NetworkService network,
     PlayerService playerService) : AbstractGamePacketHandler {

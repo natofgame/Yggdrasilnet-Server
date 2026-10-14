@@ -4,7 +4,7 @@ using Yggdrasilnet.Server.Core.Systems.Ai;
 using Yggdrasilnet.Server.Core.Systems.Ai.Behaviors;
 using Yggdrasilnet.Server.Core.World.Entities.Components;
 
-namespace Yggdrasilnet.Server.Core.Behavior.Impl;
+namespace Yggdrasilnet.Server.Core.Behavior.Behaviors.Entity;
 
 public sealed class BrainComponentBehavior : ComponentBehavior<BrainComponent> {
     public float Prudence { get; set; }

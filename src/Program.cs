@@ -1,7 +1,7 @@
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
+using Yggdrasilnet.Server.Bootstrap;
 using Yggdrasilnet.Server.Configuration;
-using Yggdrasilnet.Server.Hosting;
 
 namespace Yggdrasilnet.Server;
 

@@ -1,4 +1,4 @@
-namespace Yggdrasilnet.Server.Hosting;
+namespace Yggdrasilnet.Server.Bootstrap;
 
 /// <summary>
 ///     Represents a service that participates in the application lifetime.

@@ -6,6 +6,7 @@ using Yggdrasilnet.NetworkV4.Enums;
 using Yggdrasilnet.NetworkV4.Packets;
 using Yggdrasilnet.NetworkV4.Snapshot;
 using Yggdrasilnet.NetworkV4.Snapshot.Components;
+using Yggdrasilnet.Server.Core;
 using Yggdrasilnet.Server.Core.World;
 using Yggdrasilnet.Server.Core.World.Dimensions;
 using Yggdrasilnet.Server.Core.World.Entities.Components;
@@ -18,8 +19,9 @@ using TargetComponent = Yggdrasilnet.NetworkV4.Snapshot.Components.TargetCompone
 using WorldCollisionComponent = Yggdrasilnet.Server.Core.World.Entities.Components.Collision.CollisionComponent;
 using WorldTargetComponent = Yggdrasilnet.Server.Core.World.Entities.Components.TargetComponent;
 
-namespace Yggdrasilnet.Server.Runtime;
+namespace Yggdrasilnet.Server.Network.Snapshot;
 
+// TODO: Split builder and broadcaster
 public class SnapshotBroadcaster {
     private const int SnapshotChunkTargetBytes = 1000;
     private const int SnapshotChunkHeaderBytes = 12;
@@ -32,18 +34,18 @@ public class SnapshotBroadcaster {
     private const int SnapshotTargetComponentBytes = 25;
 
     private readonly SessionRegistry _sessions;
-    private readonly SimulationEngine _simulationEngine;
+    private readonly Simulation _simulation;
     private readonly int _tickRate;
     private readonly IWorld _world;
 
     private uint _snapshotFrameId;
 
-    public SnapshotBroadcaster(SessionRegistry session, IWorld world, SimulationEngine simulationEngine, int tickRate) {
+    public SnapshotBroadcaster(SessionRegistry session, IWorld world, Simulation simulation, int tickRate) {
         _sessions = session;
         _world = world;
 
         _tickRate = Math.Max(1, tickRate);
-        _simulationEngine = simulationEngine;
+        _simulation = simulation;
     }
 
     public void BroadcastSnapshots(long tick) {
@@ -73,7 +75,7 @@ public class SnapshotBroadcaster {
             var snapshots = BuildSnapshots(session, dimension, ownerEntityId, out var visibleEntities);
             SendDespawn(session, visibleEntities);
 
-            var registry = _simulationEngine.EntityDefinitionRegistry;
+            var registry = _simulation.EntityRegistry;
             if (session.SnapshotDefinitionsVersion < registry.DefinitionVersion) {
                 registry.SendDefinitions(session);
             }
@@ -102,7 +104,7 @@ public class SnapshotBroadcaster {
                 : frameDelivery;
 
             foreach (var chunk in chunking.Chunks)
-                _simulationEngine.Network.Send(session, chunk, delivery);
+                _simulation.Network.Send(session, chunk, delivery);
         }
     }
 
@@ -119,7 +121,7 @@ public class SnapshotBroadcaster {
                 PositionX = entity.Position.X,
                 PositionY = entity.Position.Y,
                 PositionZ = entity.Position.Z,
-                DefinitionId = _simulationEngine.EntityDefinitionRegistry.EnsureDefinitionId(entity.Id),
+                DefinitionId = _simulation.EntityRegistry.EnsureDefinitionId(entity.Id),
                 LastInputSequence = entity.UniqueId == ownerEntityId ? session.LastSequence : 0
             };
 
@@ -230,7 +232,7 @@ public class SnapshotBroadcaster {
             foreach (var id in removed)
                 packet.EntityIds.Add(id);
 
-            _simulationEngine.Network.Send(session, packet);
+            _simulation.Network.Send(session, packet);
         }
 
         session.SnapshotKnownEntities.Clear();

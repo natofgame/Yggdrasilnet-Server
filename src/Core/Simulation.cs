@@ -7,6 +7,7 @@ using Yggdrasilnet.Server.Core.Commands;
 using Yggdrasilnet.Server.Core.Events;
 using Yggdrasilnet.Server.Core.Events.Events;
 using Yggdrasilnet.Server.Core.Registry;
+using Yggdrasilnet.Server.Core.Services;
 using Yggdrasilnet.Server.Core.Systems;
 using Yggdrasilnet.Server.Core.World;
 using Yggdrasilnet.Server.Core.World.Dimensions;
@@ -15,11 +16,11 @@ using Yggdrasilnet.Server.Network;
 using Yggdrasilnet.Server.Network.Handler;
 using Yggdrasilnet.Server.Network.Services;
 using Yggdrasilnet.Server.Network.Session;
-using Yggdrasilnet.Server.Runtime.Services;
+using Yggdrasilnet.Server.Network.Snapshot;
 
-namespace Yggdrasilnet.Server.Runtime;
+namespace Yggdrasilnet.Server.Core;
 
-public sealed class SimulationEngine {
+public sealed class Simulation {
     private readonly ConcurrentQueue<IServerEvent> _events;
 
     private readonly PlayerService _players;
@@ -30,7 +31,7 @@ public sealed class SimulationEngine {
     private readonly SnapshotBroadcaster _snapshotBroadcaster;
     private readonly WorldEventRuntime _worldEvents;
 
-    public SimulationEngine(ConcurrentQueue<IServerEvent> events, ServerTransport server, int tickRate) {
+    public Simulation(ConcurrentQueue<IServerEvent> events, ServerTransport server, int tickRate) {
         _events = events;
         _server = server;
 
@@ -38,8 +39,8 @@ public sealed class SimulationEngine {
         World = CreateWorld(_worldEvents.Events, _worldEvents.Publish);
 
         Network = new NetworkService(_server);
-        EntityDefinitionRegistry = new EntityDefinitionRegistry(this);
-        _players = new PlayerService(World, _sessions, Network, EntityDefinitionRegistry);
+        EntityRegistry = new EntityRegistry(this);
+        _players = new PlayerService(World, _sessions, Network, EntityRegistry);
 
         _snapshotBroadcaster = new SnapshotBroadcaster(_sessions, World, this, tickRate);
         InitRegistry();
@@ -48,7 +49,7 @@ public sealed class SimulationEngine {
 
     public CommandFactory CommandFactory { get; } = new();
 
-    public EntityDefinitionRegistry EntityDefinitionRegistry { get; }
+    public EntityRegistry EntityRegistry { get; }
 
     public NetworkService Network { get; }
 
@@ -156,7 +157,7 @@ public sealed class SimulationEngine {
         CommandRegistry.Registers(CommandFactory, World);
     }
 
-    private static World CreateWorld(IWorldEventBus events, Action<WorldEvent> publishEvent) {
+    private static World.World CreateWorld(IWorldEventBus events, Action<WorldEvent> publishEvent) {
         var entityComponents = EntityComponentRegistry.CreateDefault();
         var behaviorRegistry = new BehaviorPackRegistry(entityComponents);
         var behaviorRoot = Path.Combine(AppContext.BaseDirectory, "BehaviorPack");
@@ -170,7 +171,7 @@ public sealed class SimulationEngine {
         var systems = new SystemPipeline();
         SystemRegistry.Registers(ref systems, behaviorRegistry, events);
 
-        var world = new World(events, behaviorRegistry);
+        var world = new World.World(events, behaviorRegistry);
         world.CreateDimension("overworld", systems, true);
 
         return world;

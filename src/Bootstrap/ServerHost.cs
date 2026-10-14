@@ -1,21 +1,19 @@
 using System.Collections.Concurrent;
 using Serilog;
 using Yggdrasilnet.NetworkV4.Protocol;
+using Yggdrasilnet.Server.Core;
 using Yggdrasilnet.Server.Network;
-using Yggdrasilnet.Server.Runtime;
 
-namespace Yggdrasilnet.Server.Hosting;
+namespace Yggdrasilnet.Server.Bootstrap;
 
 /// <summary>
 ///     Hosts the game server as a managed application service.
 /// </summary>
-public sealed class ServerHost : IHostedService, IDisposable {
+public sealed class ServerHost(int port, int tickRate) : IHostedService, IDisposable {
     private readonly ConcurrentQueue<IServerEvent> _events = new();
-    private readonly int _port;
-    private readonly int _tickRate;
 
     private ServerTransport? _server;
-    private SimulationEngine? _simulation;
+    private Simulation? _simulation;
     private GameLoop? _loop;
     private Thread? _gameLoopThread;
     private Thread? _consoleThread;
@@ -23,25 +21,18 @@ public sealed class ServerHost : IHostedService, IDisposable {
     private bool _disposed;
     private bool _stopped;
 
-    public ServerHost(int port, int tickRate) {
-        _port = port;
-        _tickRate = tickRate;
-    }
-
-    /// <summary>
-    ///     Starts the transport, simulation and background threads.
-    /// </summary>
+    /// <inheritdoc/>
     public void Start() {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
         ProtocolRegistry.Registers();
 
         _server = new ServerTransport(_events);
-        _simulation = new SimulationEngine(_events, _server, _tickRate);
-        _loop = new GameLoop(_server, _simulation, _tickRate);
+        _simulation = new Simulation(_events, _server, tickRate);
+        _loop = new GameLoop(_server, _simulation, tickRate);
 
-        _server.Start(_port);
-        Log.Information("Game loop running at {TickRate} tps", _tickRate);
+        _server.Start(port);
+        Log.Information("Game loop running at {TickRate} tps", tickRate);
 
         _runCts = new CancellationTokenSource();
 
@@ -58,9 +49,7 @@ public sealed class ServerHost : IHostedService, IDisposable {
         _gameLoopThread.Start();
     }
 
-    /// <summary>
-    ///     Requests the game loop to stop and waits for background threads to exit.
-    /// </summary>
+    /// <inheritdoc/>
     public void Stop() {
         if (_stopped) {
             return;
@@ -81,6 +70,9 @@ public sealed class ServerHost : IHostedService, IDisposable {
         Log.Information("Server stopped.");
     }
 
+    /// <summary>
+    ///  Stops the game loop and releases all resources.
+    /// </summary>
     public void Dispose() {
         if (_disposed) {
             return;
@@ -91,6 +83,10 @@ public sealed class ServerHost : IHostedService, IDisposable {
         _runCts?.Dispose();
     }
 
+    /// <summary>
+    ///  Runs the game loop until the token is canceled.
+    /// </summary>
+    /// <param name="token"></param>
     private void RunLoop(CancellationToken token) {
         try {
             _loop!.Run(token);
@@ -101,6 +97,10 @@ public sealed class ServerHost : IHostedService, IDisposable {
         }
     }
 
+    /// <summary>
+    ///  Runs the console until the token is canceled.
+    /// </summary>
+    /// <param name="token"></param>
     private void RunConsole(CancellationToken token) {
         while (!token.IsCancellationRequested) {
             var line = Console.ReadLine();
