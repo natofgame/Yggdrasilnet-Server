@@ -14,16 +14,22 @@ public static class Program {
                 theme: AnsiConsoleTheme.Code)
             .CreateLogger();
 
-        var configPath = Path.Combine(AppContext.BaseDirectory, "server.config.json");
-        var configuration = ServerConfigurationLoader.Load(configPath);
+        try {
+            var configPath = Path.Combine(AppContext.BaseDirectory, "server.config.json");
+            var configuration = ServerConfigurationLoader.Load(configPath);
 
-        using var cancellation = new CancellationTokenSource();
-        Console.CancelKeyPress += (_, eventArgs) => {
-            eventArgs.Cancel = true;
-            cancellation.Cancel();
-        };
+            using var host = new ServerHost(configuration.Port, configuration.TickRate);
+            using var app = new ServerApplication();
 
-        var host = new ServerHost(configuration.Port, configuration.TickRate);
-        host.Run(cancellation.Token);
+            app.Register(host);
+            app.Run();
+        }
+        catch (Exception exception) {
+            Log.Fatal(exception, "Application terminated unexpectedly");
+            throw;
+        }
+        finally {
+            Log.CloseAndFlush();
+        }
     }
 }

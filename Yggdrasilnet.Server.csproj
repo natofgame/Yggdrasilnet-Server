@@ -22,12 +22,6 @@
     <ItemGroup>
         <None Update="server.config.json" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
-    <ItemGroup>
-        <Folder Include="src\World\Component\"/>
-        <Folder Include="src\World\Content\Spell\Behaviors\"/>
-        <Folder Include="src\World\Event\Events\"/>
-        <Folder Include="src\World\Runtime\"/>
-    </ItemGroup>
 
     <ItemGroup>
         <Content Include="BehaviorPack\**\*.json">

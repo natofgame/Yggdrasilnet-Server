@@ -6,39 +6,101 @@ using Yggdrasilnet.Server.Runtime;
 
 namespace Yggdrasilnet.Server.Hosting;
 
-public sealed class ServerHost(int port, int tickRate) {
+/// <summary>
+///     Hosts the game server as a managed application service.
+/// </summary>
+public sealed class ServerHost : IHostedService, IDisposable {
     private readonly ConcurrentQueue<IServerEvent> _events = new();
+    private readonly int _port;
+    private readonly int _tickRate;
 
-    /// <summary>
-    ///  Starts the server.
-    /// </summary>
-    /// <param name="token"></param>
-    public void Run(CancellationToken token) {
-        ProtocolRegistry.Registers();
+    private ServerTransport? _server;
+    private SimulationEngine? _simulation;
+    private GameLoop? _loop;
+    private Thread? _gameLoopThread;
+    private Thread? _consoleThread;
+    private CancellationTokenSource? _runCts;
+    private bool _disposed;
+    private bool _stopped;
 
-        var server = new ServerTransport(_events);
-        var simulation = new SimulationEngine(_events, server, tickRate);
-        var loop = new GameLoop(server, simulation, tickRate);
-
-        server.Start(port);
-        Log.Information("Game loop running at {TickRate} tps", tickRate);
-
-        var consoleThread = new Thread(() => RunConsole(token)) { IsBackground = true };
-        consoleThread.Start();
-
-        try {
-            loop.Run(token);
-        }
-        finally {
-            server.Stop();
-            Log.Information("Server stopped.");
-        }
+    public ServerHost(int port, int tickRate) {
+        _port = port;
+        _tickRate = tickRate;
     }
 
     /// <summary>
-    ///  Runs the console.
+    ///     Starts the transport, simulation and background threads.
     /// </summary>
-    /// <param name="token"></param>
+    public void Start() {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        ProtocolRegistry.Registers();
+
+        _server = new ServerTransport(_events);
+        _simulation = new SimulationEngine(_events, _server, _tickRate);
+        _loop = new GameLoop(_server, _simulation, _tickRate);
+
+        _server.Start(_port);
+        Log.Information("Game loop running at {TickRate} tps", _tickRate);
+
+        _runCts = new CancellationTokenSource();
+
+        _consoleThread = new Thread(() => RunConsole(_runCts.Token)) {
+            IsBackground = true,
+            Name = "ServerHost.Console"
+        };
+        _consoleThread.Start();
+
+        _gameLoopThread = new Thread(() => RunLoop(_runCts.Token)) {
+            IsBackground = true,
+            Name = "ServerHost.GameLoop"
+        };
+        _gameLoopThread.Start();
+    }
+
+    /// <summary>
+    ///     Requests the game loop to stop and waits for background threads to exit.
+    /// </summary>
+    public void Stop() {
+        if (_stopped) {
+            return;
+        }
+
+        _stopped = true;
+        _runCts?.Cancel();
+
+        if (_consoleThread is not null && _consoleThread.IsAlive) {
+            _consoleThread.Join(TimeSpan.FromSeconds(2));
+        }
+
+        if (_gameLoopThread is not null && _gameLoopThread.IsAlive) {
+            _gameLoopThread.Join(TimeSpan.FromSeconds(10));
+        }
+
+        _server?.Stop();
+        Log.Information("Server stopped.");
+    }
+
+    public void Dispose() {
+        if (_disposed) {
+            return;
+        }
+
+        _disposed = true;
+        Stop();
+        _runCts?.Dispose();
+    }
+
+    private void RunLoop(CancellationToken token) {
+        try {
+            _loop!.Run(token);
+        }
+        finally {
+            _server?.Stop();
+            Log.Information("Game loop stopped.");
+        }
+    }
+
     private void RunConsole(CancellationToken token) {
         while (!token.IsCancellationRequested) {
             var line = Console.ReadLine();
