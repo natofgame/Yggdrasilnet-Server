@@ -220,11 +220,7 @@ public class SnapshotBroadcaster {
         }
 
         List<int>? removed = null;
-        foreach (var knownEntity in session.SnapshotKnownEntities) {
-            if (visibleEntities.Contains(knownEntity)) {
-                continue;
-            }
-
+        foreach (var knownEntity in session.SnapshotKnownEntities.Where(knownEntity => !visibleEntities.Contains(knownEntity))) {
             removed ??= [];
             removed.Add(knownEntity);
         }

@@ -9,6 +9,10 @@ namespace Yggdrasilnet.Server.Hosting;
 public sealed class ServerHost(int port, int tickRate) {
     private readonly ConcurrentQueue<IServerEvent> _events = new();
 
+    /// <summary>
+    ///  Starts the server.
+    /// </summary>
+    /// <param name="token"></param>
     public void Run(CancellationToken token) {
         ProtocolRegistry.Registers();
 
@@ -31,6 +35,10 @@ public sealed class ServerHost(int port, int tickRate) {
         }
     }
 
+    /// <summary>
+    ///  Runs the console.
+    /// </summary>
+    /// <param name="token"></param>
     private void RunConsole(CancellationToken token) {
         while (!token.IsCancellationRequested) {
             var line = Console.ReadLine();

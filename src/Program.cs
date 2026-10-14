@@ -1,5 +1,6 @@
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
+using Yggdrasilnet.Server.Configuration;
 using Yggdrasilnet.Server.Hosting;
 
 namespace Yggdrasilnet.Server;
@@ -13,16 +14,16 @@ public static class Program {
                 theme: AnsiConsoleTheme.Code)
             .CreateLogger();
 
-        const int port = 9050;
-        const int tickRate = 30;
+        var configPath = Path.Combine(AppContext.BaseDirectory, "server.config.json");
+        var configuration = ServerConfigurationLoader.Load(configPath);
 
-        using var cts = new CancellationTokenSource();
+        using var cancellation = new CancellationTokenSource();
         Console.CancelKeyPress += (_, eventArgs) => {
             eventArgs.Cancel = true;
-            cts.Cancel();
+            cancellation.Cancel();
         };
 
-        var host = new ServerHost(port, tickRate);
-        host.Run(cts.Token);
+        var host = new ServerHost(configuration.Port, configuration.TickRate);
+        host.Run(cancellation.Token);
     }
 }
