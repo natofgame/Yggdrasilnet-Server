@@ -2,6 +2,9 @@ using System.Numerics;
 
 namespace Yggdrasilnet.Server.Core.Systems.Ai;
 
+/// <summary>
+///  Represents the AI's combat state.
+/// </summary>
 public enum AiCombatState {
     Idle,
     Approach,
@@ -10,6 +13,9 @@ public enum AiCombatState {
     Retreat
 }
 
+/// <summary>
+///  Represents the AI's intent type.
+/// </summary>
 public enum AiIntentType {
     None,
     Stop,
@@ -17,6 +23,9 @@ public enum AiIntentType {
     Cast
 }
 
+/// <summary>
+///  Represents the AI's context.
+/// </summary>
 public readonly struct AiContext {
     public bool HasTarget { get; init; }
     public float TargetDistance { get; init; }
@@ -36,6 +45,9 @@ public readonly struct AiContext {
     public bool HasDirection => TargetDirection.LengthSquared() > 0.0001f;
 }
 
+/// <summary>
+///  Represents the AI's intent.'
+/// </summary>
 public readonly struct AiIntent {
     public AiIntentType Type { get; init; }
     public Vector2 MoveDirection { get; init; }

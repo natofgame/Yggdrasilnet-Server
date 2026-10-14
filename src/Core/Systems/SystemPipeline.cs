@@ -2,26 +2,34 @@ using Yggdrasilnet.Server.Core.World.Dimensions;
 
 namespace Yggdrasilnet.Server.Core.Systems;
 
+/// <summary>
+///  The system pipeline.
+/// </summary>
 public sealed class SystemPipeline {
-    private static readonly WorldSystemPhase[] PhaseOrder = [
-        WorldSystemPhase.Input,
-        WorldSystemPhase.Ai,
-        WorldSystemPhase.Physics,
-        WorldSystemPhase.Combat,
-        WorldSystemPhase.Cleanup
+    private static readonly SystemPhase[] PhaseOrder = [
+        SystemPhase.Input,
+        SystemPhase.Ai,
+        SystemPhase.Physics,
+        SystemPhase.Combat,
+        SystemPhase.Cleanup
     ];
 
     private readonly HashSet<string> _systemIds = new(StringComparer.OrdinalIgnoreCase);
 
-    private readonly Dictionary<WorldSystemPhase, List<IWorldSystem>> _systemsByPhase = new() {
-        [WorldSystemPhase.Input] = [],
-        [WorldSystemPhase.Ai] = [],
-        [WorldSystemPhase.Physics] = [],
-        [WorldSystemPhase.Combat] = [],
-        [WorldSystemPhase.Cleanup] = []
+    private readonly Dictionary<SystemPhase, List<ISystem>> _systemsByPhase = new() {
+        [SystemPhase.Input] = [],
+        [SystemPhase.Ai] = [],
+        [SystemPhase.Physics] = [],
+        [SystemPhase.Combat] = [],
+        [SystemPhase.Cleanup] = []
     };
 
-    public void Add(IWorldSystem system) {
+    /// <summary>
+    ///  Adds a system to the pipeline.
+    /// </summary>
+    /// <param name="system"></param>
+    /// <exception cref="InvalidOperationException"></exception>
+    public void Add(ISystem system) {
         ArgumentNullException.ThrowIfNull(system);
 
         if (!_systemIds.Add(system.Id)) {
@@ -31,11 +39,17 @@ public sealed class SystemPipeline {
         _systemsByPhase[system.Phase].Add(system);
     }
 
+    /// <summary>
+    ///   Updates all systems in the pipeline.
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="dt"></param>
     public void Update(Dimension dimension, float dt) {
         foreach (var phase in PhaseOrder) {
             var systems = _systemsByPhase[phase];
-            for (var i = 0; i < systems.Count; i++)
-                systems[i].Update(dimension, dt);
+            foreach (var system in systems) {
+                system.Update(dimension, dt);
+            }
         }
     }
 }

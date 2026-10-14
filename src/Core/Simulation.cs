@@ -10,7 +10,6 @@ using Yggdrasilnet.Server.Core.Registry;
 using Yggdrasilnet.Server.Core.Services;
 using Yggdrasilnet.Server.Core.Systems;
 using Yggdrasilnet.Server.Core.World;
-using Yggdrasilnet.Server.Core.World.Dimensions;
 using Yggdrasilnet.Server.Core.World.Entities;
 using Yggdrasilnet.Server.Network;
 using Yggdrasilnet.Server.Network.Handler;
@@ -20,12 +19,12 @@ using Yggdrasilnet.Server.Network.Snapshot;
 
 namespace Yggdrasilnet.Server.Core;
 
+/// <summary>
+///  The simulation.
+/// </summary>
 public sealed class Simulation {
     private readonly ConcurrentQueue<IServerEvent> _events;
-
     private readonly PlayerService _players;
-    private readonly ServerTransport _server;
-
     private readonly SessionRegistry _sessions = new();
 
     private readonly SnapshotBroadcaster _snapshotBroadcaster;
@@ -33,43 +32,65 @@ public sealed class Simulation {
 
     public Simulation(ConcurrentQueue<IServerEvent> events, ServerTransport server, int tickRate) {
         _events = events;
-        _server = server;
 
-        _worldEvents = new WorldEventRuntime(ResolveEntity);
-        World = CreateWorld(_worldEvents.Events, _worldEvents.Publish);
+        _worldEvents = new WorldEventRuntime(GetEntity);
+        World = CreateWorld(_worldEvents.Events);
 
-        Network = new NetworkService(_server);
+        Network = new NetworkService(server);
         EntityRegistry = new EntityRegistry(this);
         _players = new PlayerService(World, Network, EntityRegistry);
 
         _snapshotBroadcaster = new SnapshotBroadcaster(_sessions, World, this, tickRate);
-        InitRegistry();
+        CommandRegistry.Registers(CommandFactory, World);
     }
 
-
+    /// <summary>
+    ///  The command factory.
+    /// </summary>
     public CommandFactory CommandFactory { get; } = new();
 
+    /// <summary>
+    ///  The entity registry.
+    /// </summary>
     public EntityRegistry EntityRegistry { get; }
 
+    /// <summary>
+    ///  The network service.
+    /// </summary>
     public NetworkService Network { get; }
 
+    /// <summary>
+    ///  The current tick.
+    /// </summary>
     public long Tick { get; private set; }
+    
+    /// <summary>
+    ///  The world the simulation is running in.
+    /// </summary>
     public IWorld World { get; }
 
-    public IWorldEventBus Events => _worldEvents.Events;
-
-    public bool TryGetWorld(string name, out IDimension? world) {
-        return World.TryGetDimension(name, out world);
-    }
-
+    /// <summary>
+    ///  Publishes the given world event.
+    /// </summary>
+    /// <param name="worldEvent"></param>
     public void Publish(WorldEvent worldEvent) {
         _worldEvents.Publish(worldEvent);
     }
 
-    private bool ResolveEntity(int entityId, out Entity? entity) {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="entityId"></param>
+    /// <param name="entity"></param>
+    /// <returns></returns>
+    private bool GetEntity(int entityId, out Entity? entity) {
         return World.TryResolveEntity(entityId, out entity);
     }
 
+    /// <summary>
+    ///  Updates the simulation.
+    /// </summary>
+    /// <param name="dt"></param>
     public void Update(float dt) {
         Tick++;
 
@@ -78,6 +99,9 @@ public sealed class Simulation {
         _snapshotBroadcaster.BroadcastSnapshots(Tick);
     }
 
+    /// <summary>
+    ///  Drains all events from the queue.
+    /// </summary>
     private void DrainEvents() {
         while (_events.TryDequeue(out var serverEvent))
             switch (serverEvent) {
@@ -96,6 +120,10 @@ public sealed class Simulation {
             }
     }
 
+    /// <summary>
+    ///  Executes the given command.
+    /// </summary>
+    /// <param name="input"></param>
     private void OnConsoleCommand(string input) {
         var source = new CommandSource {
             Dimension = World.MainDimension,
@@ -105,7 +133,11 @@ public sealed class Simulation {
 
         CommandFactory.Execute(input, source);
     }
-
+    
+    /// <summary>
+    ///  Creates a new session for the given peer.
+    /// </summary>
+    /// <param name="peer"></param>
     private void OnPeerConnected(NetPeer peer) {
         var protocol = ProtocolRegistry.GetHighestProtocol();
         var session = new GameSession(peer, protocol);
@@ -115,6 +147,11 @@ public sealed class Simulation {
         Log.Information("Peer connected: {EndPoint}", peer.Address);
     }
 
+    /// <summary>
+    ///  Disconnects the given peer.
+    /// </summary>
+    /// <param name="peer"></param>
+    /// <param name="info"></param>
     private void OnPeerDisconnected(NetPeer peer, DisconnectInfo info) {
         if (!_sessions.Remove(peer, out var session) || session is null) {
             return;
@@ -133,6 +170,11 @@ public sealed class Simulation {
         Log.Information("Peer disconnected: {EndPoint} ({Reason})", peer.Address, info.Reason);
     }
 
+    /// <summary>
+    ///  Dispatches a packet to the appropriate handler.
+    /// </summary>
+    /// <param name="peer"></param>
+    /// <param name="payload"></param>
     private void OnPacketReceived(NetPeer peer, byte[] payload) {
         if (!_sessions.TryGet(peer, out var session) || session?.Handler is null) {
             return;
@@ -151,12 +193,13 @@ public sealed class Simulation {
             Network.Disconnect(session);
         }
     }
-
-    private void InitRegistry() {
-        CommandRegistry.Registers(CommandFactory, World);
-    }
-
-    private static World.World CreateWorld(IWorldEventBus events, Action<WorldEvent> publishEvent) {
+    
+    /// <summary>
+    ///  Creates a new world with the default behavior packs.
+    /// </summary>
+    /// <param name="events"></param>
+    /// <returns></returns>
+    private static World.World CreateWorld(IWorldEventBus events) {
         var entityComponents = EntityComponentRegistry.CreateDefault();
         var behaviorRegistry = new BehaviorPackRegistry(entityComponents);
         var behaviorRoot = Path.Combine(AppContext.BaseDirectory, "BehaviorPack");

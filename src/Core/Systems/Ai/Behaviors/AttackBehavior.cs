@@ -7,6 +7,9 @@ using Yggdrasilnet.Server.Core.World.Entities.Components.Combat;
 
 namespace Yggdrasilnet.Server.Core.Systems.Ai.Behaviors;
 
+/// <summary>
+///  Attacks the target.
+/// </summary>
 public sealed class AttackBehavior : AiBehavior {
     public float Speed { get; set; } = 7f;
     public float CastRange { get; set; } = 1.2f;
@@ -20,10 +23,14 @@ public sealed class AttackBehavior : AiBehavior {
     public float MaxCooldown { get; set; } = 2.4f;
     public float CooldownJitter { get; set; } = 0.4f;
     public bool RandomReadySpell { get; set; } = true;
-
+    
+    /// <inheritdoc/>
     public override AiCombatState State => AiCombatState.Pressure;
+    
+    /// <inheritdoc/>
     public override float TransitionLockDuration => 0.25f;
 
+    /// <inheritdoc/>
     public override float Evaluate(in AiContext context, in BrainComponent ai) {
         if (!context.HasTarget || !context.HasAttackToken || context.AttackCooldown > 0f) {
             return 0f;
@@ -45,6 +52,7 @@ public sealed class AttackBehavior : AiBehavior {
         return score;
     }
 
+    /// <inheritdoc/>
     public override AiIntent BuildIntent(
         Dimension dimension,
         Entity entity,
@@ -82,6 +90,14 @@ public sealed class AttackBehavior : AiBehavior {
             circleWeight);
     }
 
+    /// <summary>
+    /// Try Select Cast Slot
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="entity"></param>
+    /// <param name="targetDistance"></param>
+    /// <param name="slotIndex"></param>
+    /// <returns></returns>
     private bool TrySelectCastSlot(
         Dimension dimension,
         Entity entity,
@@ -121,6 +137,12 @@ public sealed class AttackBehavior : AiBehavior {
         return slotIndex >= 0;
     }
 
+    /// <summary>
+    ///  Resolve Approach Range
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="entity"></param>
+    /// <returns></returns>
     private float ResolveApproachRange(Dimension dimension, Entity entity) {
         if (!entity.TryGet<CombatComponent>(out var combat)
             || combat.Slots.Length == 0) {
@@ -128,8 +150,8 @@ public sealed class AttackBehavior : AiBehavior {
         }
 
         var best = 0f;
-        for (var i = 0; i < combat.Slots.Length; i++) {
-            if (!TryGetReadySpellDefinition(combat.Slots[i], dimension, out var spellDef)) {
+        foreach (var combatSlot in combat.Slots) {
+            if (!TryGetReadySpellDefinition(combatSlot, dimension, out var spellDef)) {
                 continue;
             }
 
@@ -142,6 +164,13 @@ public sealed class AttackBehavior : AiBehavior {
         return best > 0f ? best : ResolveCastRange(dimension, entity);
     }
 
+    /// <summary>
+    ///  Try Get Ready Spell Definition
+    /// </summary>
+    /// <param name="slot"></param>
+    /// <param name="dimension"></param>
+    /// <param name="spellDef"></param>
+    /// <returns></returns>
     private static bool TryGetReadySpellDefinition(
         CombatSlot slot,
         Dimension dimension,
@@ -172,6 +201,12 @@ public sealed class AttackBehavior : AiBehavior {
         return chargesCurrent > 0;
     }
 
+    /// <summary>
+    ///  Resolve Cast Range
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="entity"></param>
+    /// <returns></returns>
     private float ResolveCastRange(Dimension dimension, Entity entity) {
         if (!entity.TryGet<CombatComponent>(out var combat)
             || SpellIndex < 0
@@ -186,7 +221,12 @@ public sealed class AttackBehavior : AiBehavior {
 
         return ResolveCastRange(spellDef);
     }
-
+    
+    /// <summary>
+    ///  Resolve Cast Range
+    /// </summary>
+    /// <param name="spellDef"></param>
+    /// <returns></returns>
     private float ResolveCastRange(BehaviorDefinition spellDef) {
         if (spellDef.TryGetBehavior<SpellTargetingBehavior>(out var targeting) && targeting.Range > 0f) {
             return targeting.Range;
@@ -201,6 +241,11 @@ public sealed class AttackBehavior : AiBehavior {
             : MathF.Max(0.05f, projectile.Speed * projectile.Lifetime);
     }
 
+    /// <summary>
+    ///  Resolve Cooldown
+    /// </summary>
+    /// <param name="aggressivity"></param>
+    /// <returns></returns>
     private float ResolveCooldown(float aggressivity) {
         var t = Math.Clamp(aggressivity / 10f, 0f, 1f);
         var baseCooldown = MathF.Max(0.05f, MaxCooldown + (MinCooldown - MaxCooldown) * t);

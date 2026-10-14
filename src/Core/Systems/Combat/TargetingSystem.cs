@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Yggdrasilnet.NetworkV4.Enums;
 using Yggdrasilnet.Server.Core.World.Dimensions;
 using Yggdrasilnet.Server.Core.World.Entities;
@@ -8,12 +9,20 @@ using Yggdrasilnet.Server.Core.World.Entities.Components.Living;
 
 namespace Yggdrasilnet.Server.Core.Systems.Combat;
 
-public sealed class TargetingSystem : IWorldSystem {
+/// <summary>
+///  Handles targeting of entities.
+/// </summary>
+public sealed class TargetingSystem : ISystem {
+    public const string Identifier = "targeting";
     private const float MinDirectionSq = 0.0001f;
+    
+    /// <inheritdoc/>
+    public string Id => Identifier;
+    
+    /// <inheritdoc/>
+    public SystemPhase Phase => SystemPhase.Combat;
 
-    public string Id => "targeting";
-    public WorldSystemPhase Phase => WorldSystemPhase.Combat;
-
+    /// <inheritdoc/>
     public void Update(Dimension dimension, float dt) {
         if (!float.IsFinite(dt) || dt < 0f) {
             return;
@@ -34,6 +43,14 @@ public sealed class TargetingSystem : IWorldSystem {
         }
     }
 
+    /// <summary>
+    ///  Tick the targeting system.
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="self"></param>
+    /// <param name="selfCollider"></param>
+    /// <param name="target"></param>
+    /// <param name="dt"></param>
     private static void Tick(
         Dimension dimension,
         Entity self,
@@ -70,10 +87,25 @@ public sealed class TargetingSystem : IWorldSystem {
         ClearTarget(ref target);
     }
 
+    /// <summary>
+    ///  Returns the opposing layer for the given layer.
+    /// </summary>
+    /// <param name="selfLayer"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static CollisionLayer OpposingLayer(CollisionLayer selfLayer) {
         return selfLayer == CollisionLayer.Player ? CollisionLayer.Monster : CollisionLayer.Player;
     }
 
+    /// <summary>
+    ///  Tries to find the nearest entity in the given range.
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="self"></param>
+    /// <param name="range"></param>
+    /// <param name="enemyLayer"></param>
+    /// <param name="nearest"></param>
+    /// <returns></returns>
     private static bool TryFindNearest(
         Dimension dimension,
         Entity self,
@@ -108,6 +140,12 @@ public sealed class TargetingSystem : IWorldSystem {
         return found;
     }
 
+    /// <summary>
+    ///   Applies the target to the entity.
+    /// </summary>
+    /// <param name="self"></param>
+    /// <param name="target"></param>
+    /// <param name="found"></param>
     private static void ApplyTarget(
         Entity self,
         ref TargetComponent target,
@@ -125,6 +163,10 @@ public sealed class TargetingSystem : IWorldSystem {
             : 1f;
     }
 
+    /// <summary>
+    ///  Clears the target.
+    /// </summary>
+    /// <param name="target"></param>
     private static void ClearTarget(ref TargetComponent target) {
         target.EntityId = null;
         target.Distance = 0f;

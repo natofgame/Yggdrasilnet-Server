@@ -15,7 +15,7 @@ using Yggdrasilnet.Server.Core.World.Entities.Components.Projectile;
 
 namespace Yggdrasilnet.Server.Core.Systems.Combat;
 
-public sealed class ProjectileSystem : IWorldSystem {
+public sealed class ProjectileSystem : ISystem {
     private const float MinDirectionSq = 0.0001f;
 
     private static readonly Dictionary<SpellEffectType, ISpellEffectHandler> EffectHandlers = new() {
@@ -32,7 +32,7 @@ public sealed class ProjectileSystem : IWorldSystem {
     }
 
     public string Id => "projectile";
-    public WorldSystemPhase Phase => WorldSystemPhase.Combat;
+    public SystemPhase Phase => SystemPhase.Combat;
 
     public void Update(Dimension dimension, float dt) {
         if (!float.IsFinite(dt) || dt <= 0f) {

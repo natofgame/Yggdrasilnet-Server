@@ -8,10 +8,21 @@ using Yggdrasilnet.Server.Network.Session;
 
 namespace Yggdrasilnet.Server.Core.Services;
 
+/// <summary>
+///  Service for managing players.
+/// </summary>
+/// <param name="world"></param>
+/// <param name="network"></param>
+/// <param name="entityRegistry"></param>
 public sealed class PlayerService(
     IWorld world,
     NetworkService network,
     EntityRegistry entityRegistry) {
+    
+    /// <summary>
+    ///  Creates a new player entity and binds it to the given session.
+    /// </summary>
+    /// <param name="session"></param>
     public void EnterGame(GameSession session) {
         if (session.ControlledEntityId is not null) {
             return;
@@ -38,6 +49,13 @@ public sealed class PlayerService(
             player.UniqueId));
     }
 
+    /// <summary>
+    ///  Applies the given input to the player entity.
+    /// </summary>
+    /// <param name="session"></param>
+    /// <param name="x"></param>
+    /// <param name="z"></param>
+    /// <param name="sequence"></param>
     public void ApplyInput(GameSession session, float x, float z, uint sequence) {
         if (!session.ApplyInput(x, z, sequence)) {
             return;
