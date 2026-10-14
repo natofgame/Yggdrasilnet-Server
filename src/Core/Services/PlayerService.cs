@@ -10,7 +10,6 @@ namespace Yggdrasilnet.Server.Core.Services;
 
 public sealed class PlayerService(
     IWorld world,
-    SessionRegistry sessions,
     NetworkService network,
     EntityRegistry entityRegistry) {
     public void EnterGame(GameSession session) {
@@ -49,23 +48,5 @@ public sealed class PlayerService(
         }
 
         world.TrySetInput(dimensionName, entityId, x, z);
-    }
-
-    public void SyncSessionsFromWorld() {
-        foreach (var session in sessions.All) {
-            if (session.Phase != ConnectionPhase.Game) {
-                continue;
-            }
-
-            if (!session.TryGetEntityBinding(out var entityId, out var dimensionName)) {
-                continue;
-            }
-
-            if (!world.TryGetEntity(dimensionName, entityId, out var entity) || entity is null) {
-                continue;
-            }
-
-            session.SyncPosition(entity.Position.X, entity.Position.Z);
-        }
     }
 }

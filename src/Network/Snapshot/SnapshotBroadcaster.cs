@@ -22,6 +22,7 @@ using WorldTargetComponent = Yggdrasilnet.Server.Core.World.Entities.Components.
 namespace Yggdrasilnet.Server.Network.Snapshot;
 
 // TODO: Split builder and broadcaster
+// TODO: Refacto
 public class SnapshotBroadcaster {
     private const int SnapshotChunkTargetBytes = 1000;
     private const int SnapshotChunkHeaderBytes = 12;

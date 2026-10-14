@@ -40,7 +40,7 @@ public sealed class Simulation {
 
         Network = new NetworkService(_server);
         EntityRegistry = new EntityRegistry(this);
-        _players = new PlayerService(World, _sessions, Network, EntityRegistry);
+        _players = new PlayerService(World, Network, EntityRegistry);
 
         _snapshotBroadcaster = new SnapshotBroadcaster(_sessions, World, this, tickRate);
         InitRegistry();
@@ -76,7 +76,6 @@ public sealed class Simulation {
         DrainEvents();
         World.Update(dt);
         _snapshotBroadcaster.BroadcastSnapshots(Tick);
-        _players.SyncSessionsFromWorld();
     }
 
     private void DrainEvents() {

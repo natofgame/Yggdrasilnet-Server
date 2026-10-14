@@ -9,43 +9,57 @@ using Yggdrasilnet.NetworkV4.Protocol;
 
 namespace Yggdrasilnet.Server.Network;
 
+/// <summary>
+///  Transport for the server.
+/// </summary>
 public sealed class ServerTransport() : INetEventListener {
     private readonly NetManager _netManager = null!;
     private readonly NetDataWriter _writer = new();
-    public readonly ConcurrentQueue<IServerEvent> Events = null!;
+    private readonly ConcurrentQueue<IServerEvent> _events = null!;
 
     public ServerTransport(ConcurrentQueue<IServerEvent> events) : this() {
-        Events = events;
+        _events = events;
         _netManager = new NetManager(this) { AutoRecycle = true };
     }
 
+    ///  <inheritdoc/>
     public void OnPeerConnected(NetPeer peer) {
-        Events.Enqueue(new PeerConnectedEvent(peer));
+        _events.Enqueue(new PeerConnectedEvent(peer));
     }
-
+    
+    ///  <inheritdoc/>
     public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo) {
-        Events.Enqueue(new PeerDisconnectedEvent(peer, disconnectInfo));
+        _events.Enqueue(new PeerDisconnectedEvent(peer, disconnectInfo));
     }
-
+    
+    ///  <inheritdoc/>
     public void OnNetworkError(IPEndPoint endPoint, SocketError socketError) {
         Log.Warning("Network error from {EndPoint}: {Error}", endPoint, socketError);
     }
-
+    
+    ///  <inheritdoc/>
     public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber,
         DeliveryMethod deliveryMethod) {
-        Events.Enqueue(new PacketReceivedEvent(peer, reader.GetRemainingBytes()));
+        _events.Enqueue(new PacketReceivedEvent(peer, reader.GetRemainingBytes()));
         reader.Recycle();
     }
-
+    ///  <inheritdoc/>
     public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader,
         UnconnectedMessageType messageType) { }
 
+    ///  <inheritdoc/>
     public void OnNetworkLatencyUpdate(NetPeer peer, int latency) { }
 
+    ///  <inheritdoc/>
     public void OnConnectionRequest(ConnectionRequest request) {
         request.AcceptIfKey("Yggdrasilnet");
     }
 
+    /// <summary>
+    ///  Starts the server.
+    /// </summary>
+    /// <param name="port"></param>
+    /// <exception cref="InvalidOperationException"></exception>
     public void Start(int port) {
         if (!_netManager.Start(port)) {
             throw new InvalidOperationException($"Unable to bind UDP server on port {port}.");
@@ -54,14 +68,28 @@ public sealed class ServerTransport() : INetEventListener {
         Log.Information("Server listening on port {Port}", port);
     }
 
+    /// <summary>
+    ///  Stops the server.
+    /// </summary>
     public void Stop() {
         _netManager.Stop();
     }
 
+    /// <summary>
+    ///  Polls for network events.
+    /// </summary>
     public void Poll() {
         _netManager.PollEvents();
     }
 
+    /// <summary>
+    ///  Sends a packet to a peer.
+    /// </summary>
+    /// <param name="peer"></param>
+    /// <param name="packet"></param>
+    /// <param name="codec"></param>
+    /// <param name="method"></param>
+    /// <returns></returns>
     public bool Send(NetPeer peer, IGamePacket packet, PacketCodec codec,
         DeliveryMethod method = DeliveryMethod.ReliableOrdered) {
         lock (_writer) {
