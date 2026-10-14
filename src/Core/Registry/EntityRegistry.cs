@@ -3,17 +3,22 @@ using Yggdrasilnet.Server.Network.Session;
 
 namespace Yggdrasilnet.Server.Core.Registry;
 
-public class EntityRegistry {
+/// <summary>
+///  Registry for entities.
+/// </summary>
+/// <param name="simulation"></param>
+public class EntityRegistry(Simulation simulation) {
     private readonly Dictionary<string, byte> _definitionIds = new(StringComparer.OrdinalIgnoreCase);
 
-    private readonly Simulation _simulation;
-
-    public EntityRegistry(Simulation simulation) {
-        _simulation = simulation;
-    }
-
+    /// <summary>
+    ///  The current definition version.
+    /// </summary>
     public int DefinitionVersion { get; private set; }
 
+    /// <summary>
+    ///  Sends the entity definitions to the given session.
+    /// </summary>
+    /// <param name="session"></param>
     public void SendDefinitions(GameSession session) {
         if (_definitionIds.Count == 0) {
             return;
@@ -23,10 +28,16 @@ public class EntityRegistry {
         foreach (var (definitionId, id) in _definitionIds.OrderBy(entry => entry.Value))
             packet.Definitions.Add(new EntityDefinitionEntry(id, definitionId));
 
-        _simulation.Network.Send(session, packet);
+        simulation.Network.Send(session, packet);
         session.SnapshotDefinitionsVersion = DefinitionVersion;
     }
 
+    /// <summary>
+    ///  Ensures that the given definition ID is registered.
+    /// </summary>
+    /// <param name="definitionId"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
     public byte EnsureDefinitionId(string definitionId) {
         if (_definitionIds.TryGetValue(definitionId, out var existing)) {
             return existing;

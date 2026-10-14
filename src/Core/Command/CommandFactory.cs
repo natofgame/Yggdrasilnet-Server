@@ -1,4 +1,5 @@
 using System.Reflection;
+using Yggdrasilnet.Server.Core.Command;
 
 namespace Yggdrasilnet.Server.Core.Commands;
 

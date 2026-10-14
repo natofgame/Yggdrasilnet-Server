@@ -3,6 +3,7 @@ using LiteNetLib;
 using Serilog;
 using Yggdrasilnet.NetworkV4.Protocol;
 using Yggdrasilnet.Server.Core.Behavior.Registry;
+using Yggdrasilnet.Server.Core.Command;
 using Yggdrasilnet.Server.Core.Commands;
 using Yggdrasilnet.Server.Core.Events;
 using Yggdrasilnet.Server.Core.Events.Events;

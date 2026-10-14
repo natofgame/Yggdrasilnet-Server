@@ -1,6 +1,7 @@
 using Serilog;
 using Yggdrasilnet.NetworkV4.Packets;
 using Yggdrasilnet.Server.Core;
+using Yggdrasilnet.Server.Core.Command;
 using Yggdrasilnet.Server.Core.Commands;
 using Yggdrasilnet.Server.Core.Events.Events;
 using Yggdrasilnet.Server.Core.Services;

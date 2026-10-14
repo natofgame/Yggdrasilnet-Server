@@ -8,7 +8,16 @@ using Yggdrasilnet.Server.Core.Systems.Physics.Collision;
 
 namespace Yggdrasilnet.Server.Core.Registry;
 
+/// <summary>
+///  Registry for systems.
+/// </summary>
 public static class SystemRegistry {
+    /// <summary>
+    ///  Registers all systems.
+    /// </summary>
+    /// <param name="systems"></param>
+    /// <param name="behaviors"></param>
+    /// <param name="events"></param>
     public static void Registers(ref SystemPipeline systems, BehaviorPackRegistry behaviors, IWorldEventBus events) {
         systems.Add(new AiSystem());
         systems.Add(new MovementSystem());
