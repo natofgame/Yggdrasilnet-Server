@@ -4,8 +4,6 @@ using System.Runtime.CompilerServices;
 using Yggdrasilnet.NetworkV4.Enums;
 using Yggdrasilnet.Server.Core.Behavior.Models;
 using Yggdrasilnet.Server.Core.Behavior.Registry;
-using Yggdrasilnet.Server.Core.Events;
-using Yggdrasilnet.Server.Core.Events.Events;
 using Yggdrasilnet.Server.Core.World.Content.Spell;
 using Yggdrasilnet.Server.Core.World.Content.Spell.Behaviors;
 using Yggdrasilnet.Server.Core.World.Content.Spell.Effect.Handlers;
@@ -67,6 +65,8 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
         }
     }
 
+    // TODO: Refacto this
+    /*
     /// <summary>
     ///     Handles the request to cast a spell.
     /// </summary>
@@ -74,7 +74,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     [SubscribeWorldEvent]
     private void OnSpellCastRequest(SpellCastRequestEvent e) {
         _pendingCasts.Enqueue((e.EntityId, e.SlotIndex));
-    }
+    }*/
 
     /// <summary>
     ///     Handles the request to cancel a spell.

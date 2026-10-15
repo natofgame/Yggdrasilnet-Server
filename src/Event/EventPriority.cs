@@ -1,5 +1,8 @@
-namespace Yggdrasilnet.Server.Core.Events;
+namespace Yggdrasilnet.Server.Event;
 
+/// <summary>
+///  Event priority
+/// </summary>
 public enum EventPriority {
     Highest = 0,
     High = 1,

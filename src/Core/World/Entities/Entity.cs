@@ -6,7 +6,7 @@ using Yggdrasilnet.Server.Core.World.Dimensions;
 
 namespace Yggdrasilnet.Server.Core.World.Entities;
 
-public sealed class Entity : IEntity {
+public class Entity : IEntity {
     private static int _nextId;
 
     public Entity(string id, Vector3 position, IDimension? dimension = null) {
@@ -91,6 +91,8 @@ public sealed class Entity : IEntity {
         foreach (var storeObj in manager.GetAllStores())
             storeObj.Remove(UniqueId);
     }
+
+    public Player ToPlayer() => (Player)this;
 
     public override string ToString() {
         return $"Entity#{UniqueId} [{Id}] @ {Position}";

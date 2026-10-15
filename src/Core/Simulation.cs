@@ -5,13 +5,12 @@ using Yggdrasilnet.NetworkV4.Protocol;
 using Yggdrasilnet.Server.Core.Behavior.Registry;
 using Yggdrasilnet.Server.Core.Command;
 using Yggdrasilnet.Server.Core.Commands;
-using Yggdrasilnet.Server.Core.Events;
-using Yggdrasilnet.Server.Core.Events.Events;
 using Yggdrasilnet.Server.Core.Registry;
 using Yggdrasilnet.Server.Core.Services;
 using Yggdrasilnet.Server.Core.Systems;
 using Yggdrasilnet.Server.Core.World;
 using Yggdrasilnet.Server.Core.World.Entities;
+using Yggdrasilnet.Server.Event.Events.Player;
 using Yggdrasilnet.Server.Network;
 using Yggdrasilnet.Server.Network.Handler;
 using Yggdrasilnet.Server.Network.Services;
@@ -29,17 +28,16 @@ public sealed class Simulation {
     private readonly SessionRegistry _sessions = new();
 
     private readonly SnapshotBroadcaster _snapshotBroadcaster;
-    private readonly WorldEventRuntime _worldEvents;
-
-    public Simulation(ConcurrentQueue<IServerEvent> events, ServerTransport server, int tickRate) {
+ 
+    public Simulation(Bootstrap.Server server, ConcurrentQueue<IServerEvent> events, ServerTransport transport, int tickRate) {
         _events = events;
 
-        _worldEvents = new WorldEventRuntime(GetEntity);
-        World = CreateWorld(_worldEvents.Events);
+        World = CreateWorld();
 
-        Network = new NetworkService(server);
+        Server = server;
+        Network = new NetworkService(transport);
         EntityRegistry = new EntityRegistry(this);
-        _players = new PlayerService(World, Network, EntityRegistry);
+        _players = new PlayerService(Server, World, Network, EntityRegistry);
 
         _snapshotBroadcaster = new SnapshotBroadcaster(_sessions, World, this, tickRate);
         CommandRegistry.Registers(CommandFactory, World);
@@ -64,19 +62,16 @@ public sealed class Simulation {
     ///     The current tick.
     /// </summary>
     public long Tick { get; private set; }
+    
+    /// <summary>
+    ///  The server.
+    /// </summary>
+    public Bootstrap.Server Server { get; }
 
     /// <summary>
     ///     The world the simulation is running in.
     /// </summary>
     public IWorld World { get; }
-
-    /// <summary>
-    ///     Publishes the given world event.
-    /// </summary>
-    /// <param name="worldEvent"></param>
-    public void Publish(WorldEvent worldEvent) {
-        _worldEvents.Publish(worldEvent);
-    }
 
     /// <summary>
     /// </summary>
@@ -157,11 +152,9 @@ public sealed class Simulation {
             return;
         }
 
+        // TODO: Handle disconnection gracefully
         if (session.TryGetEntityBinding(out var entityId, out var dimensionName)) {
-            _worldEvents.Publish(new PlayerDeconnexionEvent(
-                peer.Address.ToString(),
-                entityId,
-                info.Reason.ToString()));
+            Server.Event.Publish(new PlayerLeaveEvent(entityId));
 
             World.TryDespawn(dimensionName, entityId);
             session.ClearEntityBinding();
@@ -193,13 +186,8 @@ public sealed class Simulation {
             Network.Disconnect(session);
         }
     }
-
-    /// <summary>
-    ///     Creates a new world with the default behavior packs.
-    /// </summary>
-    /// <param name="events"></param>
-    /// <returns></returns>
-    private static World.World CreateWorld(IWorldEventBus events) {
+    
+    private World.World CreateWorld() {
         var entityComponents = EntityComponentRegistry.CreateDefault();
         var behaviorRegistry = new BehaviorPackRegistry(entityComponents);
         var behaviorRoot = Path.Combine(AppContext.BaseDirectory, "BehaviorPack");
@@ -211,9 +199,9 @@ public sealed class Simulation {
             behaviorRegistry.SpellBehaviorCount);
 
         var systems = new SystemPipeline();
-        SystemRegistry.Registers(ref systems, behaviorRegistry, events);
+        SystemRegistry.Registers(ref systems, behaviorRegistry);
 
-        var world = new World.World(events, behaviorRegistry);
+        var world = new World.World(this, behaviorRegistry);
         world.CreateDimension("overworld", systems, true);
 
         return world;

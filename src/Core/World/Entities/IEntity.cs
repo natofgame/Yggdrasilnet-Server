@@ -24,4 +24,6 @@ public interface IEntity {
     T Set<T>(T component) where T : class, IComponent;
 
     bool Remove<T>() where T : class, IComponent;
+
+    Player ToPlayer();
 }

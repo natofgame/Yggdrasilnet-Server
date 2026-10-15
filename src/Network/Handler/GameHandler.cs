@@ -2,20 +2,19 @@ using Serilog;
 using Yggdrasilnet.NetworkV4.Packets;
 using Yggdrasilnet.Server.Core;
 using Yggdrasilnet.Server.Core.Command;
-using Yggdrasilnet.Server.Core.Events.Events;
 using Yggdrasilnet.Server.Core.Services;
 using Yggdrasilnet.Server.Network.Session;
 
 namespace Yggdrasilnet.Server.Network.Handler;
 
 /// <summary>
-///     Handles the game phase.
+///  Handles packets during the game phase.
 /// </summary>
-/// <param name="runtime"></param>
+/// <param name="simulation"></param>
 /// <param name="session"></param>
 /// <param name="playerService"></param>
 public sealed class GameHandler(
-    Simulation runtime,
+    Simulation simulation,
     GameSession session,
     PlayerService playerService) : AbstractGamePacketHandler {
     /// <inheritdoc />
@@ -35,7 +34,8 @@ public sealed class GameHandler(
             return;
         }
 
-        runtime.Publish(new SpellCastRequestEvent(entityId, packet.SpellIndex));
+        // TODO: implement
+        //simulation.Server.Event.Publish(new SpellCastRequestEvent(entityId, packet.SpellIndex));
 
         Log.Debug("CastSpell from {EndPoint}: slot={SpellIndex}",
             session.Peer.Address, packet.SpellIndex);
@@ -52,11 +52,11 @@ public sealed class GameHandler(
 
         var source = new CommandSource {
             ExecutorEntityId = entityId,
-            Dimension = runtime.World.GetDimension(dimensionName),
+            Dimension = simulation.World.GetDimension(dimensionName),
             PermissionLevel = 0,
             SendFeedback = msg => Log.Information("[{EndPoint}] {Message}", session.Peer.Address, msg)
         };
 
-        runtime.CommandFactory.Execute(packet.Command, source);
+        simulation.CommandFactory.Execute(packet.Command, source);
     }
 }

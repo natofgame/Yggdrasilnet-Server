@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Yggdrasilnet.Server.Core.Behavior.Registry;
 using Yggdrasilnet.Server.Core.Components;
-using Yggdrasilnet.Server.Core.Events;
 using Yggdrasilnet.Server.Core.Systems;
 using Yggdrasilnet.Server.Core.World.Dimensions;
 using Yggdrasilnet.Server.Core.World.Entities;
@@ -14,14 +13,14 @@ public sealed class World : IWorld {
     private readonly ConcurrentDictionary<string, Dimension> _dimensions = new(StringComparer.OrdinalIgnoreCase);
     private Dimension? _main;
 
-    public World(IWorldEventBus events, BehaviorPackRegistry? behaviors = null) {
-        Events = events;
+    public World(Simulation simulation, BehaviorPackRegistry? behaviors = null) {
         Behaviors = behaviors ?? new BehaviorPackRegistry();
+        Simulation = simulation;
     }
 
+    public Simulation Simulation { get; }
     public long Tick { get; private set; }
     public BehaviorPackRegistry Behaviors { get; }
-    public IWorldEventBus Events { get; }
     public IDimension MainDimension => _main ?? throw new InvalidOperationException("No main dimension set");
     public IReadOnlyCollection<IDimension> Dimensions => _dimensions.Values.ToList().AsReadOnly();
 

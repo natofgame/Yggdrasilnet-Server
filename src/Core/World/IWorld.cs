@@ -1,7 +1,6 @@
 using System.Numerics;
 using Yggdrasilnet.Server.Core.Behavior.Registry;
 using Yggdrasilnet.Server.Core.Components;
-using Yggdrasilnet.Server.Core.Events;
 using Yggdrasilnet.Server.Core.Systems;
 using Yggdrasilnet.Server.Core.World.Dimensions;
 using Yggdrasilnet.Server.Core.World.Entities;
@@ -9,9 +8,9 @@ using Yggdrasilnet.Server.Core.World.Entities;
 namespace Yggdrasilnet.Server.Core.World;
 
 public interface IWorld {
+    Simulation Simulation { get; }
     long Tick { get; }
     BehaviorPackRegistry Behaviors { get; }
-    IWorldEventBus Events { get; }
     IDimension MainDimension { get; }
     IReadOnlyCollection<IDimension> Dimensions { get; }
 

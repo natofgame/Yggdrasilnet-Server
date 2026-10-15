@@ -1,8 +1,8 @@
 using System.Numerics;
 using Yggdrasilnet.NetworkV4.Packets;
-using Yggdrasilnet.Server.Core.Events.Events;
 using Yggdrasilnet.Server.Core.Registry;
 using Yggdrasilnet.Server.Core.World;
+using Yggdrasilnet.Server.Event.Events.Player;
 using Yggdrasilnet.Server.Network.Services;
 using Yggdrasilnet.Server.Network.Session;
 
@@ -15,9 +15,11 @@ namespace Yggdrasilnet.Server.Core.Services;
 /// <param name="network"></param>
 /// <param name="entityRegistry"></param>
 public sealed class PlayerService(
+    Bootstrap.Server server,
     IWorld world,
     NetworkService network,
     EntityRegistry entityRegistry) {
+    
     /// <summary>
     ///     Creates a new player entity and binds it to the given session.
     /// </summary>
@@ -27,7 +29,7 @@ public sealed class PlayerService(
             return;
         }
 
-        var player = world.Spawn("player", Vector3.Zero);
+        var player = world.Spawn("player", Vector3.Zero).ToPlayer();
         session.BindEntity(player.UniqueId, world.MainDimension.Id);
         session.MarkReady();
 
@@ -43,9 +45,7 @@ public sealed class PlayerService(
 
         entityRegistry.SendDefinitions(session);
 
-        world.Events.Post(new PlayerConnexionEvent(
-            session.Peer.Address.ToString(),
-            player.UniqueId));
+        server.Event.Publish(new PlayerJoinEvent(player));
     }
 
     /// <summary>

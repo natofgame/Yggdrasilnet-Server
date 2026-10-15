@@ -1,7 +1,6 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Yggdrasilnet.NetworkV4.Enums;
-using Yggdrasilnet.Server.Core.Events.Events;
 using Yggdrasilnet.Server.Core.Systems.Ai.Behaviors;
 using Yggdrasilnet.Server.Core.World.Dimensions;
 using Yggdrasilnet.Server.Core.World.Entities;
@@ -88,9 +87,11 @@ public static class AiBrain {
         }
 
         var intent = selected.BuildIntent(dimension, entity, ref ai, context, dt);
-        if (intent.Type == AiIntentType.Cast && intent.SpellIndex >= 0) {
-            dimension.World.Events.Post(new SpellCastRequestEvent(entity.UniqueId, intent.SpellIndex));
-        }
+        
+        // TODO: Implement
+        /*if (intent.Type == AiIntentType.Cast && intent.SpellIndex >= 0) {
+            dimension.World.Simulation.Server.Event.Publish(new SpellCastRequestEvent(entity.UniqueId, intent.SpellIndex));
+        }*/
 
         AiMotionController.Apply(ref input, ref movement, intent);
     }

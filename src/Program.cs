@@ -18,7 +18,7 @@ public static class Program {
             var configPath = Path.Combine(AppContext.BaseDirectory, "server.config.json");
             var configuration = ServerConfigurationLoader.Load(configPath);
 
-            using var host = new ServerHost(configuration.Port, configuration.TickRate);
+            using var host = new Bootstrap.Server(configuration.Port, configuration.TickRate);
             using var app = new ServerApplication();
 
             app.Register(host);

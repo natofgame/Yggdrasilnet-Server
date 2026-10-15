@@ -1,5 +1,4 @@
 using Yggdrasilnet.Server.Core.Behavior.Registry;
-using Yggdrasilnet.Server.Core.Events;
 using Yggdrasilnet.Server.Core.Systems;
 using Yggdrasilnet.Server.Core.Systems.Ai;
 using Yggdrasilnet.Server.Core.Systems.Combat;
@@ -17,14 +16,12 @@ public static class SystemRegistry {
     /// </summary>
     /// <param name="systems"></param>
     /// <param name="behaviors"></param>
-    /// <param name="events"></param>
-    public static void Registers(ref SystemPipeline systems, BehaviorPackRegistry behaviors, IWorldEventBus events) {
+    public static void Registers(ref SystemPipeline systems, BehaviorPackRegistry behaviors) {
         systems.Add(new AiSystem());
         systems.Add(new MovementSystem());
         systems.Add(new CollisionSystem());
 
         var spellCastSystem = new SpellCastSystem(behaviors);
-        events.Register(spellCastSystem);
         systems.Add(new TargetingSystem());
         systems.Add(spellCastSystem);
 
