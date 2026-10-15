@@ -13,6 +13,7 @@ public sealed class ProjectileMotionComponentBehavior : ComponentBehavior<Projec
     public float AutoTargetInfluence { get; set; } = 1f;
     public float AutoTargetRange { get; set; }
 
+    /// <inheritdoc />
     protected override ProjectileMotionComponent GetComponent(Vector3 spawnPosition) {
         BehaviorValidation.EnsurePositive(Lifetime, "projectile_motion.lifetime");
         BehaviorValidation.EnsureFinite(
@@ -41,6 +42,11 @@ public sealed class ProjectileMotionComponentBehavior : ComponentBehavior<Projec
         };
     }
 
+    /// <summary>
+    ///     Calculates the direction of the projectile.
+    /// </summary>
+    /// <param name="velocity"></param>
+    /// <returns></returns>
     private static Vector3 ResolveDirection(Vector3 velocity) {
         var flat = velocity with { Y = 0f };
         return flat.LengthSquared() > 0.0001f
@@ -48,6 +54,11 @@ public sealed class ProjectileMotionComponentBehavior : ComponentBehavior<Projec
             : Vector3.UnitZ;
     }
 
+    /// <summary>
+    ///     Calculates the speed of the projectile in the plane.
+    /// </summary>
+    /// <param name="velocity"></param>
+    /// <returns></returns>
     private static float ResolvePlanarSpeed(Vector3 velocity) {
         var flat = velocity with { Y = 0f };
         return MathF.Sqrt(flat.LengthSquared());

@@ -13,7 +13,7 @@ using Yggdrasilnet.Server.Core.World.Entities.Components.Movement;
 namespace Yggdrasilnet.Server.Core.Systems.Ai;
 
 /// <summary>
-///  Handles the AI brain.
+///     Handles the AI brain.
 /// </summary>
 public static class AiBrain {
     private const float MinDirectionSq = 0.0001f;
@@ -29,7 +29,7 @@ public static class AiBrain {
     ];
 
     /// <summary>
-    ///  Updates the AI's state.'
+    ///     Updates the AI's state.'
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="entity"></param>
@@ -96,7 +96,7 @@ public static class AiBrain {
     }
 
     /// <summary>
-    ///  Selects the best behavior from the given actions.
+    ///     Selects the best behavior from the given actions.
     /// </summary>
     /// <param name="actions"></param>
     /// <param name="context"></param>
@@ -152,7 +152,7 @@ public static class AiBrain {
     }
 
     /// <summary>
-    ///  Builds the context for the AI.
+    ///     Builds the context for the AI.
     /// </summary>
     /// <param name="ai"></param>
     /// <returns></returns>
@@ -178,7 +178,7 @@ public static class AiBrain {
     }
 
     /// <summary>
-    ///   Refreshes the AI's target.'
+    ///     Refreshes the AI's target.'
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="self"></param>
@@ -212,7 +212,7 @@ public static class AiBrain {
     }
 
     /// <summary>
-    ///   Applies the current target to the AI.
+    ///     Applies the current target to the AI.
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="self"></param>
@@ -237,7 +237,7 @@ public static class AiBrain {
     }
 
     /// <summary>
-    ///  Tries to find the nearest player.
+    ///     Tries to find the nearest player.
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="self"></param>
@@ -273,7 +273,7 @@ public static class AiBrain {
     }
 
     /// <summary>
-    ///  Applies the target to the AI.
+    ///     Applies the target to the AI.
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="self"></param>
@@ -308,7 +308,7 @@ public static class AiBrain {
     }
 
     /// <summary>
-    ///  Clears the AI's target.'
+    ///     Clears the AI's target.'
     /// </summary>
     /// <param name="ai"></param>
     private static void ClearTarget(ref BrainComponent ai) {
@@ -328,10 +328,12 @@ public static class AiBrain {
     }
 
     /// <summary>
-    ///  Clamps a value to [0, 1].
+    ///     Clamps a value to [0, 1].
     /// </summary>
     /// <param name="v"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static float Clamp01(float v) =>  Math.Clamp(v, 0f, 1f);
+    private static float Clamp01(float v) {
+        return Math.Clamp(v, 0f, 1f);
+    }
 }

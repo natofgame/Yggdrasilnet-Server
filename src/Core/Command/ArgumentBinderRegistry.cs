@@ -1,7 +1,7 @@
 namespace Yggdrasilnet.Server.Core.Command;
 
 /// <summary>
-///  Registry for argument binders.
+///     Registry for argument binders.
 /// </summary>
 internal sealed class ArgumentBinderRegistry {
     private readonly Dictionary<Type, Func<string, (bool Ok, object? Value)>> _binders = new();
@@ -18,7 +18,7 @@ internal sealed class ArgumentBinderRegistry {
     }
 
     /// <summary>
-    /// Add a binder for a specific type.
+    ///     Add a binder for a specific type.
     /// </summary>
     /// <param name="binder"></param>
     /// <typeparam name="T"></typeparam>
@@ -30,7 +30,7 @@ internal sealed class ArgumentBinderRegistry {
     }
 
     /// <summary>
-    ///  Add a binder for a specific type.
+    ///     Add a binder for a specific type.
     /// </summary>
     /// <param name="parse"></param>
     /// <typeparam name="T"></typeparam>
@@ -42,7 +42,7 @@ internal sealed class ArgumentBinderRegistry {
     }
 
     /// <summary>
-    ///  Try to bind a token to a value.
+    ///     Try to bind a token to a value.
     /// </summary>
     /// <param name="type"></param>
     /// <param name="token"></param>
@@ -66,7 +66,7 @@ internal sealed class ArgumentBinderRegistry {
     }
 
     /// <summary>
-    ///  Delegate for parsing a token to a value.
+    ///     Delegate for parsing a token to a value.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     private delegate bool TryParse<T>(string token, out T value);

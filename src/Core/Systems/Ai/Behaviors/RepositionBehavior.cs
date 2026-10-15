@@ -6,7 +6,7 @@ using Yggdrasilnet.Server.Core.World.Entities.Components;
 namespace Yggdrasilnet.Server.Core.Systems.Ai.Behaviors;
 
 /// <summary>
-///  Repositions the target.
+///     Repositions the target.
 /// </summary>
 public sealed class RepositionBehavior : AiBehavior {
     public float Speed { get; set; } = 4.6f;
@@ -17,14 +17,14 @@ public sealed class RepositionBehavior : AiBehavior {
     public float WanderWeight { get; set; } = 0.45f;
     public float WanderJitter { get; set; } = 0.9f;
     public float BurstScore { get; set; } = 0.82f;
-    
-    /// <inheritdoc/>
+
+    /// <inheritdoc />
     public override AiCombatState State => AiCombatState.Reposition;
-    
-    /// <inheritdoc/>
+
+    /// <inheritdoc />
     public override float TransitionLockDuration => 0.55f;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public override float Evaluate(in AiContext context, in BrainComponent ai) {
         if (!context.HasTarget || context.HasAttackToken || ai.RepositionBurstTimer <= 0f) {
             return 0f;
@@ -38,7 +38,7 @@ public sealed class RepositionBehavior : AiBehavior {
             1f);
     }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public override AiIntent BuildIntent(
         Dimension dimension,
         Entity entity,

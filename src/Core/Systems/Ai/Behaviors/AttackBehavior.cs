@@ -8,7 +8,7 @@ using Yggdrasilnet.Server.Core.World.Entities.Components.Combat;
 namespace Yggdrasilnet.Server.Core.Systems.Ai.Behaviors;
 
 /// <summary>
-///  Attacks the target.
+///     Attacks the target.
 /// </summary>
 public sealed class AttackBehavior : AiBehavior {
     public float Speed { get; set; } = 7f;
@@ -23,14 +23,14 @@ public sealed class AttackBehavior : AiBehavior {
     public float MaxCooldown { get; set; } = 2.4f;
     public float CooldownJitter { get; set; } = 0.4f;
     public bool RandomReadySpell { get; set; } = true;
-    
-    /// <inheritdoc/>
+
+    /// <inheritdoc />
     public override AiCombatState State => AiCombatState.Pressure;
-    
-    /// <inheritdoc/>
+
+    /// <inheritdoc />
     public override float TransitionLockDuration => 0.25f;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public override float Evaluate(in AiContext context, in BrainComponent ai) {
         if (!context.HasTarget || !context.HasAttackToken || context.AttackCooldown > 0f) {
             return 0f;
@@ -52,7 +52,7 @@ public sealed class AttackBehavior : AiBehavior {
         return score;
     }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public override AiIntent BuildIntent(
         Dimension dimension,
         Entity entity,
@@ -91,7 +91,7 @@ public sealed class AttackBehavior : AiBehavior {
     }
 
     /// <summary>
-    /// Try Select Cast Slot
+    ///     Try Select Cast Slot
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="entity"></param>
@@ -138,7 +138,7 @@ public sealed class AttackBehavior : AiBehavior {
     }
 
     /// <summary>
-    ///  Resolve Approach Range
+    ///     Resolve Approach Range
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="entity"></param>
@@ -165,7 +165,7 @@ public sealed class AttackBehavior : AiBehavior {
     }
 
     /// <summary>
-    ///  Try Get Ready Spell Definition
+    ///     Try Get Ready Spell Definition
     /// </summary>
     /// <param name="slot"></param>
     /// <param name="dimension"></param>
@@ -202,7 +202,7 @@ public sealed class AttackBehavior : AiBehavior {
     }
 
     /// <summary>
-    ///  Resolve Cast Range
+    ///     Resolve Cast Range
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="entity"></param>
@@ -221,9 +221,9 @@ public sealed class AttackBehavior : AiBehavior {
 
         return ResolveCastRange(spellDef);
     }
-    
+
     /// <summary>
-    ///  Resolve Cast Range
+    ///     Resolve Cast Range
     /// </summary>
     /// <param name="spellDef"></param>
     /// <returns></returns>
@@ -242,7 +242,7 @@ public sealed class AttackBehavior : AiBehavior {
     }
 
     /// <summary>
-    ///  Resolve Cooldown
+    ///     Resolve Cooldown
     /// </summary>
     /// <param name="aggressivity"></param>
     /// <returns></returns>

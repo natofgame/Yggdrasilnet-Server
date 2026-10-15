@@ -6,19 +6,19 @@ using Yggdrasilnet.Server.Core.World.Entities.Components;
 namespace Yggdrasilnet.Server.Core.Systems.Ai.Behaviors;
 
 /// <summary>
-///  Approaches the target, then flanks it.
+///     Approaches the target, then flanks it.
 /// </summary>
 public sealed class FlankBehavior : AiBehavior {
     public float Speed { get; set; } = 3.2f;
     public float Distance { get; set; } = 2.5f;
-    
-    /// <inheritdoc/>
+
+    /// <inheritdoc />
     public override AiCombatState State => AiCombatState.Approach;
-    
-    /// <inheritdoc/>
+
+    /// <inheritdoc />
     public override float TransitionLockDuration => 0.45f;
-    
-    /// <inheritdoc/>
+
+    /// <inheritdoc />
     public override float Evaluate(in AiContext context, in BrainComponent ai) {
         if (!context.HasTarget) {
             return 0f;
@@ -39,8 +39,8 @@ public sealed class FlankBehavior : AiBehavior {
 
         return 0f;
     }
-    
-    /// <inheritdoc/>
+
+    /// <inheritdoc />
     public override AiIntent BuildIntent(
         Dimension dimension,
         Entity entity,

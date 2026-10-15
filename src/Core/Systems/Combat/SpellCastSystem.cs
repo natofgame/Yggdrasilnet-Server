@@ -22,7 +22,7 @@ using CollisionLayer = Yggdrasilnet.NetworkV4.Enums.CollisionLayer;
 namespace Yggdrasilnet.Server.Core.Systems.Combat;
 
 /// <summary>
-///  Handles casting of spells.
+///     Handles casting of spells.
 /// </summary>
 /// <param name="behaviors"></param>
 public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
@@ -40,13 +40,13 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     private readonly BehaviorPackRegistry _behaviors = behaviors ?? throw new ArgumentNullException(nameof(behaviors));
     private readonly Queue<(int EntityId, int SlotIndex)> _pendingCasts = new();
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public string Id => Identifier;
-    
-    /// <inheritdoc/>
+
+    /// <inheritdoc />
     public SystemPhase Phase => SystemPhase.Combat;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public void Update(Dimension dimension, float dt) {
         DrainPendingCasts(dimension);
 
@@ -68,7 +68,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Handles the request to cast a spell.
+    ///     Handles the request to cast a spell.
     /// </summary>
     /// <param name="e"></param>
     [SubscribeWorldEvent]
@@ -77,7 +77,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Handles the request to cancel a spell.
+    ///     Handles the request to cancel a spell.
     /// </summary>
     /// <param name="dimension"></param>
     private void DrainPendingCasts(Dimension dimension) {
@@ -88,7 +88,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Tries to begin casting a spell.
+    ///     Tries to begin casting a spell.
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="entityId"></param>
@@ -159,7 +159,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Tries to cast a spell.
+    ///     Tries to cast a spell.
     /// </summary>
     /// <param name="charges"></param>
     /// <param name="slot"></param>
@@ -176,7 +176,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Consumes a charge from a spell.
+    ///     Consumes a charge from a spell.
     /// </summary>
     /// <param name="charges"></param>
     /// <param name="slot"></param>
@@ -192,7 +192,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Starts a cooldown for a spell.
+    ///     Starts a cooldown for a spell.
     /// </summary>
     /// <param name="spellDef"></param>
     /// <param name="slot"></param>
@@ -207,7 +207,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Applies stacks to a spell.
+    ///     Applies stacks to a spell.
     /// </summary>
     /// <param name="spellDef"></param>
     /// <param name="slot"></param>
@@ -225,7 +225,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Tick the spell casting system.
+    ///     Tick the spell casting system.
     /// </summary>
     /// <param name="combat"></param>
     /// <param name="dt"></param>
@@ -259,7 +259,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Tick the spell casting system.
+    ///     Tick the spell casting system.
     /// </summary>
     /// <param name="charges"></param>
     /// <param name="slot"></param>
@@ -283,7 +283,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Tick the spell casting system.
+    ///     Tick the spell casting system.
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="caster"></param>
@@ -337,7 +337,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Resets the spell casting system.
+    ///     Resets the spell casting system.
     /// </summary>
     /// <param name="combat"></param>
     private static void ResetCast(ref CombatComponent combat) {
@@ -350,7 +350,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Applies a phase to a spell.
+    ///     Applies a phase to a spell.
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="caster"></param>
@@ -388,7 +388,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Applies effects to the caster.
+    ///     Applies effects to the caster.
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="context"></param>
@@ -412,7 +412,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Applies effects to the target.
+    ///     Applies effects to the target.
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="context"></param>
@@ -456,7 +456,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Applies a stack to a spell.
+    ///     Applies a stack to a spell.
     /// </summary>
     /// <param name="effect"></param>
     /// <param name="phase"></param>
@@ -471,7 +471,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Applies a stack to a spell.
+    ///     Applies a stack to a spell.
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="caster"></param>
@@ -516,7 +516,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Resolves the direction of a spell.
+    ///     Resolves the direction of a spell.
     /// </summary>
     /// <param name="spellDef"></param>
     /// <returns></returns>
@@ -534,7 +534,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Resolves the direction of a spell.
+    ///     Resolves the direction of a spell.
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="caster"></param>
@@ -576,7 +576,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///   Determines if the spell can be cast.
+    ///     Determines if the spell can be cast.
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="caster"></param>
@@ -627,7 +627,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Resolves the direction of a spell.
+    ///     Resolves the direction of a spell.
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="caster"></param>
@@ -666,7 +666,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Resolves the direction of a spell.
+    ///     Resolves the direction of a spell.
     /// </summary>
     /// <param name="spellDef"></param>
     /// <returns></returns>
@@ -691,7 +691,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Resole Enemy Layer
+    ///     Resole Enemy Layer
     /// </summary>
     /// <param name="entity"></param>
     /// <returns></returns>
@@ -705,7 +705,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Determines if the spell can be cast.
+    ///     Determines if the spell can be cast.
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="casterId"></param>
@@ -750,7 +750,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///   Try Resolve Locked Target Entity
+    ///     Try Resolve Locked Target Entity
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="caster"></param>
@@ -779,7 +779,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Determines if the spell can be cast.
+    ///     Determines if the spell can be cast.
     /// </summary>
     /// <param name="entity"></param>
     /// <returns></returns>
@@ -792,7 +792,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Determines if the spell can be cast.
+    ///     Determines if the spell can be cast.
     /// </summary>
     /// <param name="rawDirection"></param>
     /// <returns></returns>
@@ -804,7 +804,7 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
     }
 
     /// <summary>
-    ///  Determines if the spell can be cast.
+    ///     Determines if the spell can be cast.
     /// </summary>
     /// <param name="offset"></param>
     /// <param name="relativeVelocity"></param>

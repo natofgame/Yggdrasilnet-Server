@@ -6,19 +6,19 @@ using Yggdrasilnet.Server.Core.World.Entities.Components.Movement;
 namespace Yggdrasilnet.Server.Core.Systems.Ai;
 
 /// <summary>
-///  Handles AI.
+///     Handles AI.
 /// </summary>
 public sealed class AiSystem : ISystem {
     public const string Identifier = "ai";
     private readonly AiGroupCoordinator _groups = new();
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public string Id => Identifier;
-    
-    /// <inheritdoc/>
+
+    /// <inheritdoc />
     public SystemPhase Phase => SystemPhase.Ai;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public void Update(Dimension dimension, float dt) {
         if (!float.IsFinite(dt) || dt < 0f) {
             return;

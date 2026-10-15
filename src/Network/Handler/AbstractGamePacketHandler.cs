@@ -3,21 +3,21 @@ using Yggdrasilnet.NetworkV4.Packets;
 namespace Yggdrasilnet.Server.Network.Handler;
 
 /// <summary>
-///  Abstract implementation of <see cref="IGamePacketHandler"/>.
+///     Abstract implementation of <see cref="IGamePacketHandler" />.
 /// </summary>
 public abstract class AbstractGamePacketHandler : IGamePacketHandler {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public virtual void Handle(RequestProtocolPacket packet) { }
-    
-    /// <inheritdoc/>
+
+    /// <inheritdoc />
     public virtual void Handle(InputPacket packet) { }
-    
-    /// <inheritdoc/>
+
+    /// <inheritdoc />
     public virtual void Handle(CastSpellPacket packet) { }
-    
-    /// <inheritdoc/>
+
+    /// <inheritdoc />
     public virtual void Handle(ProtocolAcceptedPacket packet) { }
-    
-    /// <inheritdoc/>
+
+    /// <inheritdoc />
     public virtual void Handle(CommandPacket packet) { }
 }

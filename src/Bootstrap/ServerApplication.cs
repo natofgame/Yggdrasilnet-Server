@@ -7,8 +7,8 @@ namespace Yggdrasilnet.Server.Bootstrap;
 ///     and graceful termination.
 /// </summary>
 public sealed class ServerApplication : IDisposable {
-    private readonly CancellationTokenSource _shutdownCts = new();
     private readonly List<IHostedService> _services = new();
+    private readonly CancellationTokenSource _shutdownCts = new();
     private bool _disposed;
     private bool _servicesStopped;
 
@@ -16,6 +16,20 @@ public sealed class ServerApplication : IDisposable {
     ///     Token that is canceled when the application is requested to shut down.
     /// </summary>
     public CancellationToken ShutdownToken => _shutdownCts.Token;
+
+    /// <summary>
+    ///     Disposes of the application.
+    /// </summary>
+    public void Dispose() {
+        if (_disposed) {
+            return;
+        }
+
+        _disposed = true;
+        RequestShutdown();
+        StopServices();
+        _shutdownCts.Dispose();
+    }
 
     /// <summary>
     ///     Registers a hosted service.
@@ -59,21 +73,7 @@ public sealed class ServerApplication : IDisposable {
     }
 
     /// <summary>
-    ///  Disposes of the application.
-    /// </summary>
-    public void Dispose() {
-        if (_disposed) {
-            return;
-        }
-
-        _disposed = true;
-        RequestShutdown();
-        StopServices();
-        _shutdownCts.Dispose();
-    }
-
-    /// <summary>
-    ///  Registers handlers for shutdown signals.
+    ///     Registers handlers for shutdown signals.
     /// </summary>
     private void RegisterShutdownHandlers() {
         Console.CancelKeyPress += OnCancelKeyPress;
@@ -81,7 +81,7 @@ public sealed class ServerApplication : IDisposable {
     }
 
     /// <summary>
-    ///  Unregisters handlers for shutdown signals.
+    ///     Unregisters handlers for shutdown signals.
     /// </summary>
     private void UnregisterShutdownHandlers() {
         Console.CancelKeyPress -= OnCancelKeyPress;
@@ -89,7 +89,7 @@ public sealed class ServerApplication : IDisposable {
     }
 
     /// <summary>
-    ///  Handles Ctrl+C and other signals to request shutdown.
+    ///     Handles Ctrl+C and other signals to request shutdown.
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="eventArgs"></param>
@@ -99,36 +99,35 @@ public sealed class ServerApplication : IDisposable {
     }
 
     /// <summary>
-    ///  Handles process exit to request shutdown.
+    ///     Handles process exit to request shutdown.
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="eventArgs"></param>
     private void OnProcessExit(object? sender, EventArgs eventArgs) {
         RequestShutdown();
     }
-    
+
     /// <summary>
-    ///  Starts all registered services.
+    ///     Starts all registered services.
     /// </summary>
     private void StartServices() {
         Log.Information("Starting server application...");
 
-        foreach (var service in _services) {
+        foreach (var service in _services)
             service.Start();
-        }
 
         Log.Information("Server application started. Press Ctrl+C to stop.");
     }
 
     /// <summary>
-    ///   Blocks until shutdown is requested.
+    ///     Blocks until shutdown is requested.
     /// </summary>
     private void WaitForShutdown() {
         _shutdownCts.Token.WaitHandle.WaitOne();
     }
 
     /// <summary>
-    ///  Stops all registered services.
+    ///     Stops all registered services.
     /// </summary>
     private void StopServices() {
         if (_servicesStopped) {
@@ -138,14 +137,13 @@ public sealed class ServerApplication : IDisposable {
         _servicesStopped = true;
         Log.Information("Stopping server application...");
 
-        foreach (var service in _services.AsEnumerable().Reverse()) {
+        foreach (var service in _services.AsEnumerable().Reverse())
             try {
                 service.Stop();
             }
             catch (Exception exception) {
                 Log.Error(exception, "Error stopping service {ServiceType}", service.GetType().Name);
             }
-        }
 
         Log.Information("Server application stopped.");
     }

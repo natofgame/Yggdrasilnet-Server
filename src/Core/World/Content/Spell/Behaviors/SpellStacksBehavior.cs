@@ -1,4 +1,3 @@
-using System.Numerics;
 using Yggdrasilnet.Server.Core.Behavior.Core;
 using Yggdrasilnet.Server.Core.World.Dimensions;
 
@@ -19,7 +18,7 @@ public sealed class SpellStacksBehavior : IBehavior {
         ? value
         : throw new InvalidDataException($"Unknown stack policy type '{Type}'.");
 
-    void IBehavior.Apply(Dimension dimension, int entityId, Vector3 spawnPosition) { }
+    void IBehavior.Apply(Dimension dimension, int entityId) { }
 
     public void Validate() {
         if (MaxStacks < 0) {

@@ -1,12 +1,10 @@
 using System.Numerics;
-using Yggdrasilnet.Server.Core.Commands;
-using Yggdrasilnet.Server.Core.World;
 
 namespace Yggdrasilnet.Server.Core.Command.Commands;
 
 public class SummonCommand : ICommand {
     /// <summary>
-    ///  Summons an entity.
+    ///     Summons an entity.
     /// </summary>
     /// <param name="source"></param>
     /// <param name="entityType"></param>

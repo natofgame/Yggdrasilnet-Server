@@ -8,7 +8,7 @@ using Yggdrasilnet.Server.Network.Session;
 namespace Yggdrasilnet.Server.Network.Handler;
 
 /// <summary>
-///  Handles the handshake.
+///     Handles the handshake.
 /// </summary>
 /// <param name="runtime"></param>
 /// <param name="session"></param>
@@ -19,8 +19,7 @@ public sealed class HandshakeHandler(
     GameSession session,
     NetworkService network,
     PlayerService playerService) : AbstractGamePacketHandler {
-    
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public override void Handle(RequestProtocolPacket packet) {
         if (!network.TrySelectProtocol(session, packet.ProtocolVersion)) {
             Log.Warning("Unsupported protocol {ProtocolVersion} from {EndPoint}", packet.ProtocolVersion,
@@ -39,12 +38,12 @@ public sealed class HandshakeHandler(
             session.Peer.Address, session.Codec.Protocol.ProtocolVersion);
     }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public override void Handle(InputPacket packet) {
         Log.Debug("Input ignored for {EndPoint} because handshake is not completed.", session.Peer.Address);
     }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public override void Handle(CastSpellPacket packet) {
         Log.Debug("CastSpell ignored for {EndPoint} because handshake is not completed.", session.Peer.Address);
     }

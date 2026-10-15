@@ -9,7 +9,7 @@ using Yggdrasilnet.Server.Network.Session;
 namespace Yggdrasilnet.Server.Core.Services;
 
 /// <summary>
-///  Service for managing players.
+///     Service for managing players.
 /// </summary>
 /// <param name="world"></param>
 /// <param name="network"></param>
@@ -18,9 +18,8 @@ public sealed class PlayerService(
     IWorld world,
     NetworkService network,
     EntityRegistry entityRegistry) {
-    
     /// <summary>
-    ///  Creates a new player entity and binds it to the given session.
+    ///     Creates a new player entity and binds it to the given session.
     /// </summary>
     /// <param name="session"></param>
     public void EnterGame(GameSession session) {
@@ -50,7 +49,7 @@ public sealed class PlayerService(
     }
 
     /// <summary>
-    ///  Applies the given input to the player entity.
+    ///     Applies the given input to the player entity.
     /// </summary>
     /// <param name="session"></param>
     /// <param name="x"></param>

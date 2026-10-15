@@ -1,7 +1,7 @@
 namespace Yggdrasilnet.Server.Core.Command;
 
 /// <summary>
-///  Marks a method as a command.
+///     Marks a method as a command.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class CommandAttribute : Attribute {
@@ -14,12 +14,12 @@ public sealed class CommandAttribute : Attribute {
     }
 
     /// <summary>
-    ///  The name of the command.
+    ///     The name of the command.
     /// </summary>
     public string Name { get; }
-    
+
     /// <summary>
-    ///  The permission level required to execute the command.
+    ///     The permission level required to execute the command.
     /// </summary>
     public int Permission { get; init; } = 0;
 }

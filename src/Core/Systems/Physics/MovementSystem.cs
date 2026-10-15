@@ -8,9 +8,11 @@ using Yggdrasilnet.Server.Core.World.Entities.Components.Movement;
 namespace Yggdrasilnet.Server.Core.Systems.Physics;
 
 /// <summary>
-///  The movement system.
+///     The movement system.
 /// </summary>
 public sealed class MovementSystem : ISystem {
+    public const string Identifier = "movement";
+
     private static readonly ISteeringBehavior[] Behaviors = [
         new SeekSteeringBehavior(),
         new CircleSteeringBehavior(),
@@ -19,18 +21,16 @@ public sealed class MovementSystem : ISystem {
         new WanderSteeringBehavior(),
         new RoamConstraintSteeringBehavior()
     ];
-    
-    public const string Identifier = "movement";
-    
+
     private readonly SteeringContext _context = new();
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public string Id => Identifier;
-    
-    /// <inheritdoc/>    
+
+    /// <inheritdoc />
     public SystemPhase Phase => SystemPhase.Physics;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public void Update(Dimension dimension, float dt) {
         _context.Tick++;
         _context.DeltaTime = dt;
@@ -91,7 +91,7 @@ public sealed class MovementSystem : ISystem {
     }
 
     /// <summary>
-    ///  Applies steering to all entities without a player target.
+    ///     Applies steering to all entities without a player target.
     /// </summary>
     /// <param name="dt"></param>
     private void ApplyNoPlayerSteering(float dt) {
@@ -99,13 +99,12 @@ public sealed class MovementSystem : ISystem {
         _context.HasDirection = false;
 
         var steeredAgents = _context.SteeredAgents;
-        foreach (var agent in steeredAgents) {
+        foreach (var agent in steeredAgents)
             StepEntity(agent, dt);
-        }
     }
 
     /// <summary>
-    ///  Applies steering to a single entity.
+    ///     Applies steering to a single entity.
     /// </summary>
     /// <param name="agent"></param>
     /// <param name="dt"></param>
@@ -132,7 +131,7 @@ public sealed class MovementSystem : ISystem {
     }
 
     /// <summary>
-    ///  Applies all behaviors to the given agent.
+    ///     Applies all behaviors to the given agent.
     /// </summary>
     /// <param name="agent"></param>
     /// <param name="movement"></param>
@@ -151,15 +150,14 @@ public sealed class MovementSystem : ISystem {
         }
 
         var steeringAgent = agent with { Movement = movement };
-        foreach (var behavior in Behaviors) {
+        foreach (var behavior in Behaviors)
             behavior.Apply(_context, steeringAgent, ref steer);
-        }
 
         ApplySteeringVelocity(ref movement, steer, moveSpeed, dt);
     }
 
     /// <summary>
-    ///  Prepares the direction vector for the given agent.
+    ///     Prepares the direction vector for the given agent.
     /// </summary>
     /// <param name="agentPosition"></param>
     /// <param name="targetPosition"></param>
@@ -178,7 +176,7 @@ public sealed class MovementSystem : ISystem {
     }
 
     /// <summary>
-    ///  Determines the update interval for the given nearest player distance.
+    ///     Determines the update interval for the given nearest player distance.
     /// </summary>
     /// <param name="nearestPlayerDistanceSquared"></param>
     /// <returns></returns>
@@ -191,7 +189,7 @@ public sealed class MovementSystem : ISystem {
     }
 
     /// <summary>
-    ///  Applies the steering velocity to the given movement component.
+    ///     Applies the steering velocity to the given movement component.
     /// </summary>
     /// <param name="movement"></param>
     /// <param name="steer"></param>
@@ -250,7 +248,7 @@ public sealed class MovementSystem : ISystem {
     }
 
     /// <summary>
-    ///  Returns the flat position of the given vector.
+    ///     Returns the flat position of the given vector.
     /// </summary>
     /// <param name="position"></param>
     /// <returns></returns>

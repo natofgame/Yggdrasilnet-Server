@@ -8,12 +8,12 @@ using Yggdrasilnet.Server.Network.Session;
 namespace Yggdrasilnet.Server.Network.Services;
 
 /// <summary>
-///  Network service.
+///     Network service.
 /// </summary>
 /// <param name="server"></param>
 public sealed class NetworkService(ServerTransport server) {
     /// <summary>
-    ///  Tries to select a protocol for the given session.
+    ///     Tries to select a protocol for the given session.
     /// </summary>
     /// <param name="session"></param>
     /// <param name="version"></param>
@@ -28,7 +28,7 @@ public sealed class NetworkService(ServerTransport server) {
     }
 
     /// <summary>
-    ///  Sends a packet to the given session.
+    ///     Sends a packet to the given session.
     /// </summary>
     /// <param name="session"></param>
     /// <param name="packet"></param>
@@ -39,9 +39,9 @@ public sealed class NetworkService(ServerTransport server) {
                 packet.GetType().Name, session.Peer.Address);
         }
     }
-    
+
     /// <summary>
-    ///  Disconnects the given session.
+    ///     Disconnects the given session.
     /// </summary>
     /// <param name="session"></param>
     public void Disconnect(GameSession session) {
@@ -49,7 +49,7 @@ public sealed class NetworkService(ServerTransport server) {
     }
 
     /// <summary>
-    ///  Dispatches a packet to the given handler.
+    ///     Dispatches a packet to the given handler.
     /// </summary>
     /// <param name="handler"></param>
     /// <param name="packet"></param>

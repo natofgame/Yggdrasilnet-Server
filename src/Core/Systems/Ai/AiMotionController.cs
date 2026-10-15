@@ -5,14 +5,14 @@ using Yggdrasilnet.Server.Core.World.Entities.Components.Movement;
 namespace Yggdrasilnet.Server.Core.Systems.Ai;
 
 /// <summary>
-///  Handles applying AI intents to the entity.
+///     Handles applying AI intents to the entity.
 /// </summary>
 public static class AiMotionController {
     private const float DefaultNeighborAvoidRadius = 1.35f;
     private const float DefaultNeighborAvoidWeight = 1.1f;
 
     /// <summary>
-    ///  Stops the entity.
+    ///     Stops the entity.
     /// </summary>
     /// <param name="input"></param>
     /// <param name="movement"></param>
@@ -21,7 +21,7 @@ public static class AiMotionController {
     }
 
     /// <summary>
-    ///  Applies the given intent to the entity.
+    ///     Applies the given intent to the entity.
     /// </summary>
     /// <param name="input"></param>
     /// <param name="movement"></param>
@@ -49,7 +49,7 @@ public static class AiMotionController {
     }
 
     /// <summary>
-    ///  Applies the move intent to the entity.
+    ///     Applies the move intent to the entity.
     /// </summary>
     /// <param name="input"></param>
     /// <param name="steering"></param>
@@ -91,7 +91,7 @@ public static class AiMotionController {
     }
 
     /// <summary>
-    ///  Resets the entity's intents.'
+    ///     Resets the entity's intents.'
     /// </summary>
     /// <param name="input"></param>
     /// <param name="steering"></param>

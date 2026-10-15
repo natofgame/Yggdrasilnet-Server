@@ -20,7 +20,7 @@
         <ProjectReference Include="..\Yggdrasilnet.NetworkV4\Yggdrasilnet.NetworkV4.csproj"/>
     </ItemGroup>
     <ItemGroup>
-        <None Update="server.config.json" CopyToOutputDirectory="PreserveNewest" />
+        <None Update="server.config.json" CopyToOutputDirectory="PreserveNewest"/>
     </ItemGroup>
 
     <ItemGroup>

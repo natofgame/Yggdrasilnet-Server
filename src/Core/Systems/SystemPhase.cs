@@ -1,7 +1,7 @@
 namespace Yggdrasilnet.Server.Core.Systems;
 
 /// <summary>
-///  The phase of the world system.
+///     The phase of the world system.
 /// </summary>
 public enum SystemPhase {
     Input = 0,

@@ -11,17 +11,30 @@ namespace Yggdrasilnet.Server.Bootstrap;
 /// </summary>
 public sealed class ServerHost(int port, int tickRate) : IHostedService, IDisposable {
     private readonly ConcurrentQueue<IServerEvent> _events = new();
+    private Thread? _consoleThread;
+    private bool _disposed;
+    private Thread? _gameLoopThread;
+    private GameLoop? _loop;
+    private CancellationTokenSource? _runCts;
 
     private ServerTransport? _server;
     private Simulation? _simulation;
-    private GameLoop? _loop;
-    private Thread? _gameLoopThread;
-    private Thread? _consoleThread;
-    private CancellationTokenSource? _runCts;
-    private bool _disposed;
     private bool _stopped;
 
-    /// <inheritdoc/>
+    /// <summary>
+    ///     Stops the game loop and releases all resources.
+    /// </summary>
+    public void Dispose() {
+        if (_disposed) {
+            return;
+        }
+
+        _disposed = true;
+        Stop();
+        _runCts?.Dispose();
+    }
+
+    /// <inheritdoc />
     public void Start() {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
@@ -49,7 +62,7 @@ public sealed class ServerHost(int port, int tickRate) : IHostedService, IDispos
         _gameLoopThread.Start();
     }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public void Stop() {
         if (_stopped) {
             return;
@@ -71,20 +84,7 @@ public sealed class ServerHost(int port, int tickRate) : IHostedService, IDispos
     }
 
     /// <summary>
-    ///  Stops the game loop and releases all resources.
-    /// </summary>
-    public void Dispose() {
-        if (_disposed) {
-            return;
-        }
-
-        _disposed = true;
-        Stop();
-        _runCts?.Dispose();
-    }
-
-    /// <summary>
-    ///  Runs the game loop until the token is canceled.
+    ///     Runs the game loop until the token is canceled.
     /// </summary>
     /// <param name="token"></param>
     private void RunLoop(CancellationToken token) {
@@ -98,7 +98,7 @@ public sealed class ServerHost(int port, int tickRate) : IHostedService, IDispos
     }
 
     /// <summary>
-    ///  Runs the console until the token is canceled.
+    ///     Runs the console until the token is canceled.
     /// </summary>
     /// <param name="token"></param>
     private void RunConsole(CancellationToken token) {

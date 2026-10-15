@@ -6,7 +6,7 @@ using Yggdrasilnet.Server.Network.Handler;
 namespace Yggdrasilnet.Server.Network.Session;
 
 /// <summary>
-///  Represents a session between a client and the server.
+///     Represents a session between a client and the server.
 /// </summary>
 /// <param name="peer"></param>
 /// <param name="protocol"></param>
@@ -15,52 +15,52 @@ public sealed class GameSession(NetPeer peer, GameProtocol protocol) {
     private bool _hasSequence;
 
     /// <summary>
-    ///  The peer associated with this session.
+    ///     The peer associated with this session.
     /// </summary>
     public NetPeer Peer { get; } = peer;
-    
+
     /// <summary>
-    ///  The packet codec for this session.
+    ///     The packet codec for this session.
     /// </summary>
     public PacketCodec Codec { get; } = new(protocol);
-    
+
     /// <summary>
-    ///  The packet handler for this session.
+    ///     The packet handler for this session.
     /// </summary>
     public IGamePacketHandler? Handler { get; private set; }
-    
+
     /// <summary>
-    ///  The phase of the connection.
+    ///     The phase of the connection.
     /// </summary>
     public ConnectionPhase Phase { get; private set; } = ConnectionPhase.Handshake;
 
     /// <summary>
-    ///  The last sequence number received.
+    ///     The last sequence number received.
     /// </summary>
     public uint LastSequence { get; private set; }
-    
+
     /// <summary>
-    ///  The version of the snapshot definitions.
+    ///     The version of the snapshot definitions.
     /// </summary>
     public int SnapshotDefinitionsVersion { get; set; }
-    
+
     /// <summary>
-    ///  Snapshot of the known entities.
+    ///     Snapshot of the known entities.
     /// </summary>
     public HashSet<int> SnapshotKnownEntities { get; } = [];
-    
+
     /// <summary>
-    ///  The entity the session is controlling.
+    ///     The entity the session is controlling.
     /// </summary>
     public int? ControlledEntityId { get; private set; }
-    
+
     /// <summary>
-    ///  The dimension the entity is in.
+    ///     The dimension the entity is in.
     /// </summary>
     public string DimensionName { get; private set; } = DefaultDimensionName;
 
     /// <summary>
-    ///  Sets the packet handler for this session.
+    ///     Sets the packet handler for this session.
     /// </summary>
     /// <param name="handler"></param>
     public void SetHandler(IGamePacketHandler handler) {
@@ -68,7 +68,7 @@ public sealed class GameSession(NetPeer peer, GameProtocol protocol) {
     }
 
     /// <summary>
-    ///  Sets the protocol to use for this session.
+    ///     Sets the protocol to use for this session.
     /// </summary>
     /// <param name="protocolToUse"></param>
     public void SetProtocol(GameProtocol protocolToUse) {
@@ -76,14 +76,14 @@ public sealed class GameSession(NetPeer peer, GameProtocol protocol) {
     }
 
     /// <summary>
-    /// Marks the session as ready to play.
+    ///     Marks the session as ready to play.
     /// </summary>
     public void MarkReady() {
         Phase = ConnectionPhase.Game;
     }
 
     /// <summary>
-    ///  Binds the session to an entity.
+    ///     Binds the session to an entity.
     /// </summary>
     /// <param name="entityId"></param>
     /// <param name="dimensionName"></param>
@@ -95,7 +95,7 @@ public sealed class GameSession(NetPeer peer, GameProtocol protocol) {
     }
 
     /// <summary>
-    ///  Clears the entity binding.
+    ///     Clears the entity binding.
     /// </summary>
     public void ClearEntityBinding() {
         ControlledEntityId = null;
@@ -103,7 +103,7 @@ public sealed class GameSession(NetPeer peer, GameProtocol protocol) {
     }
 
     /// <summary>
-    /// Tries to get the entity binding.
+    ///     Tries to get the entity binding.
     /// </summary>
     /// <param name="entityId"></param>
     /// <param name="dimensionName"></param>
@@ -121,7 +121,7 @@ public sealed class GameSession(NetPeer peer, GameProtocol protocol) {
     }
 
     /// <summary>
-    ///    Applies the input to the controlled entity.
+    ///     Applies the input to the controlled entity.
     /// </summary>
     /// <param name="x"></param>
     /// <param name="z"></param>
@@ -138,7 +138,7 @@ public sealed class GameSession(NetPeer peer, GameProtocol protocol) {
     }
 
     /// <summary>
-    ///  Returns true if the candidate is newer than the current.
+    ///     Returns true if the candidate is newer than the current.
     /// </summary>
     /// <param name="candidate"></param>
     /// <param name="current"></param>

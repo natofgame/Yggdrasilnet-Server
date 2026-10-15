@@ -5,14 +5,14 @@ using Yggdrasilnet.Server.Network;
 namespace Yggdrasilnet.Server.Bootstrap;
 
 /// <summary>
-///  The game loop.
+///     The game loop.
 /// </summary>
 /// <param name="server"></param>
 /// <param name="simulation"></param>
 /// <param name="tickRate"></param>
 public sealed class GameLoop(ServerTransport server, Simulation simulation, int tickRate) {
     /// <summary>
-    ///  Run the game loop.
+    ///     Run the game loop.
     /// </summary>
     /// <param name="token"></param>
     public void Run(CancellationToken token) {

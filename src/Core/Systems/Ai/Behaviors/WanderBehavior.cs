@@ -6,26 +6,26 @@ using Yggdrasilnet.Server.Core.World.Entities.Components;
 namespace Yggdrasilnet.Server.Core.Systems.Ai.Behaviors;
 
 /// <summary>
-///  Wanders around randomly.
+///     Wanders around randomly.
 /// </summary>
 public sealed class WanderBehavior : AiBehavior {
     public float Speed { get; set; } = 2f;
     public float Radius { get; set; } = 6f;
     public float ArriveDistance { get; set; } = 0.5f;
     public float IdleDuration { get; set; } = 2f;
-    
-    /// <inheritdoc/>
+
+    /// <inheritdoc />
     public override AiCombatState State => AiCombatState.Idle;
-    
-    /// <inheritdoc/>
+
+    /// <inheritdoc />
     public override float TransitionLockDuration => 0.3f;
-    
-    /// <inheritdoc/>
+
+    /// <inheritdoc />
     public override float Evaluate(in AiContext context, in BrainComponent ai) {
         return context.HasTarget ? 0f : 1f;
     }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public override AiIntent BuildIntent(
         Dimension dimension,
         Entity entity,
@@ -58,7 +58,7 @@ public sealed class WanderBehavior : AiBehavior {
     }
 
     /// <summary>
-    ///  Picks a random point within a circle.
+    ///     Picks a random point within a circle.
     /// </summary>
     /// <param name="origin"></param>
     /// <param name="radius"></param>

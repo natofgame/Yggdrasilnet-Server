@@ -4,19 +4,19 @@ using Yggdrasilnet.Server.Network.Session;
 namespace Yggdrasilnet.Server.Core.Registry;
 
 /// <summary>
-///  Registry for entities.
+///     Registry for entities.
 /// </summary>
 /// <param name="simulation"></param>
 public class EntityRegistry(Simulation simulation) {
     private readonly Dictionary<string, byte> _definitionIds = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
-    ///  The current definition version.
+    ///     The current definition version.
     /// </summary>
     public int DefinitionVersion { get; private set; }
 
     /// <summary>
-    ///  Sends the entity definitions to the given session.
+    ///     Sends the entity definitions to the given session.
     /// </summary>
     /// <param name="session"></param>
     public void SendDefinitions(GameSession session) {
@@ -33,7 +33,7 @@ public class EntityRegistry(Simulation simulation) {
     }
 
     /// <summary>
-    ///  Ensures that the given definition ID is registered.
+    ///     Ensures that the given definition ID is registered.
     /// </summary>
     /// <param name="definitionId"></param>
     /// <returns></returns>

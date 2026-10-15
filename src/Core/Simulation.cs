@@ -21,7 +21,7 @@ using Yggdrasilnet.Server.Network.Snapshot;
 namespace Yggdrasilnet.Server.Core;
 
 /// <summary>
-///  The simulation.
+///     The simulation.
 /// </summary>
 public sealed class Simulation {
     private readonly ConcurrentQueue<IServerEvent> _events;
@@ -46,32 +46,32 @@ public sealed class Simulation {
     }
 
     /// <summary>
-    ///  The command factory.
+    ///     The command factory.
     /// </summary>
     public CommandFactory CommandFactory { get; } = new();
 
     /// <summary>
-    ///  The entity registry.
+    ///     The entity registry.
     /// </summary>
     public EntityRegistry EntityRegistry { get; }
 
     /// <summary>
-    ///  The network service.
+    ///     The network service.
     /// </summary>
     public NetworkService Network { get; }
 
     /// <summary>
-    ///  The current tick.
+    ///     The current tick.
     /// </summary>
     public long Tick { get; private set; }
-    
+
     /// <summary>
-    ///  The world the simulation is running in.
+    ///     The world the simulation is running in.
     /// </summary>
     public IWorld World { get; }
 
     /// <summary>
-    ///  Publishes the given world event.
+    ///     Publishes the given world event.
     /// </summary>
     /// <param name="worldEvent"></param>
     public void Publish(WorldEvent worldEvent) {
@@ -79,7 +79,6 @@ public sealed class Simulation {
     }
 
     /// <summary>
-    /// 
     /// </summary>
     /// <param name="entityId"></param>
     /// <param name="entity"></param>
@@ -89,7 +88,7 @@ public sealed class Simulation {
     }
 
     /// <summary>
-    ///  Updates the simulation.
+    ///     Updates the simulation.
     /// </summary>
     /// <param name="dt"></param>
     public void Update(float dt) {
@@ -101,7 +100,7 @@ public sealed class Simulation {
     }
 
     /// <summary>
-    ///  Drains all events from the queue.
+    ///     Drains all events from the queue.
     /// </summary>
     private void DrainEvents() {
         while (_events.TryDequeue(out var serverEvent))
@@ -122,7 +121,7 @@ public sealed class Simulation {
     }
 
     /// <summary>
-    ///  Executes the given command.
+    ///     Executes the given command.
     /// </summary>
     /// <param name="input"></param>
     private void OnConsoleCommand(string input) {
@@ -134,9 +133,9 @@ public sealed class Simulation {
 
         CommandFactory.Execute(input, source);
     }
-    
+
     /// <summary>
-    ///  Creates a new session for the given peer.
+    ///     Creates a new session for the given peer.
     /// </summary>
     /// <param name="peer"></param>
     private void OnPeerConnected(NetPeer peer) {
@@ -149,7 +148,7 @@ public sealed class Simulation {
     }
 
     /// <summary>
-    ///  Disconnects the given peer.
+    ///     Disconnects the given peer.
     /// </summary>
     /// <param name="peer"></param>
     /// <param name="info"></param>
@@ -172,7 +171,7 @@ public sealed class Simulation {
     }
 
     /// <summary>
-    ///  Dispatches a packet to the appropriate handler.
+    ///     Dispatches a packet to the appropriate handler.
     /// </summary>
     /// <param name="peer"></param>
     /// <param name="payload"></param>
@@ -194,9 +193,9 @@ public sealed class Simulation {
             Network.Disconnect(session);
         }
     }
-    
+
     /// <summary>
-    ///  Creates a new world with the default behavior packs.
+    ///     Creates a new world with the default behavior packs.
     /// </summary>
     /// <param name="events"></param>
     /// <returns></returns>

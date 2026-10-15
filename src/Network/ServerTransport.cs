@@ -10,53 +10,54 @@ using Yggdrasilnet.NetworkV4.Protocol;
 namespace Yggdrasilnet.Server.Network;
 
 /// <summary>
-///  Transport for the server.
+///     Transport for the server.
 /// </summary>
 public sealed class ServerTransport() : INetEventListener {
+    private readonly ConcurrentQueue<IServerEvent> _events = null!;
     private readonly NetManager _netManager = null!;
     private readonly NetDataWriter _writer = new();
-    private readonly ConcurrentQueue<IServerEvent> _events = null!;
 
     public ServerTransport(ConcurrentQueue<IServerEvent> events) : this() {
         _events = events;
         _netManager = new NetManager(this) { AutoRecycle = true };
     }
 
-    ///  <inheritdoc/>
+    /// <inheritdoc />
     public void OnPeerConnected(NetPeer peer) {
         _events.Enqueue(new PeerConnectedEvent(peer));
     }
-    
-    ///  <inheritdoc/>
+
+    /// <inheritdoc />
     public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo) {
         _events.Enqueue(new PeerDisconnectedEvent(peer, disconnectInfo));
     }
-    
-    ///  <inheritdoc/>
+
+    /// <inheritdoc />
     public void OnNetworkError(IPEndPoint endPoint, SocketError socketError) {
         Log.Warning("Network error from {EndPoint}: {Error}", endPoint, socketError);
     }
-    
-    ///  <inheritdoc/>
+
+    /// <inheritdoc />
     public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber,
         DeliveryMethod deliveryMethod) {
         _events.Enqueue(new PacketReceivedEvent(peer, reader.GetRemainingBytes()));
         reader.Recycle();
     }
-    ///  <inheritdoc/>
+
+    /// <inheritdoc />
     public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader,
         UnconnectedMessageType messageType) { }
 
-    ///  <inheritdoc/>
+    /// <inheritdoc />
     public void OnNetworkLatencyUpdate(NetPeer peer, int latency) { }
 
-    ///  <inheritdoc/>
+    /// <inheritdoc />
     public void OnConnectionRequest(ConnectionRequest request) {
         request.AcceptIfKey("Yggdrasilnet");
     }
 
     /// <summary>
-    ///  Starts the server.
+    ///     Starts the server.
     /// </summary>
     /// <param name="port"></param>
     /// <exception cref="InvalidOperationException"></exception>
@@ -69,21 +70,21 @@ public sealed class ServerTransport() : INetEventListener {
     }
 
     /// <summary>
-    ///  Stops the server.
+    ///     Stops the server.
     /// </summary>
     public void Stop() {
         _netManager.Stop();
     }
 
     /// <summary>
-    ///  Polls for network events.
+    ///     Polls for network events.
     /// </summary>
     public void Poll() {
         _netManager.PollEvents();
     }
 
     /// <summary>
-    ///  Sends a packet to a peer.
+    ///     Sends a packet to a peer.
     /// </summary>
     /// <param name="peer"></param>
     /// <param name="packet"></param>

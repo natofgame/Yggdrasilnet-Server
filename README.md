@@ -14,7 +14,8 @@ The authoritative, data-driven game server of Yggdrasilnet
 
 ## 🧭 Overview
 
-The server is responsible for maintaining the world state, executing entity logic, and synchronizing data across all connected clients. It operates on an authoritative model to ensure game integrity.
+The server is responsible for maintaining the world state, executing entity logic, and synchronizing data across all
+connected clients. It operates on an authoritative model to ensure game integrity.
 
 ## ⚙️ Technical Specifications
 

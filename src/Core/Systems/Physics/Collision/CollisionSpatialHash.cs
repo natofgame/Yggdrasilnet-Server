@@ -4,7 +4,7 @@ using Yggdrasilnet.Maths.Collision;
 namespace Yggdrasilnet.Server.Core.Systems.Physics.Collision;
 
 /// <summary>
-///  A spatial hash for collision detection.
+///     A spatial hash for collision detection.
 /// </summary>
 internal sealed class CollisionSpatialHash {
     private const float DefaultCellSize = 2f;
@@ -15,12 +15,12 @@ internal sealed class CollisionSpatialHash {
     private int[] _stamps = [];
 
     /// <summary>
-    ///  The size of each cell in the spatial hash.
+    ///     The size of each cell in the spatial hash.
     /// </summary>
     private float CellSize { get; set; } = DefaultCellSize;
 
     /// <summary>
-    ///  Rebuilds the spatial hash with the given bounding boxes.
+    ///     Rebuilds the spatial hash with the given bounding boxes.
     /// </summary>
     /// <param name="boxes"></param>
     /// <param name="cellSize"></param>
@@ -29,13 +29,12 @@ internal sealed class CollisionSpatialHash {
         CellSize = cellSize > 0.1f ? cellSize : DefaultCellSize;
         EnsureStamps(boxes.Count);
 
-        for (var i = 0; i < boxes.Count; i++) {
+        for (var i = 0; i < boxes.Count; i++)
             Insert(i, boxes[i]);
-        }
     }
 
     /// <summary>
-    ///  Queries the spatial hash for entities within the given bounding box.
+    ///     Queries the spatial hash for entities within the given bounding box.
     /// </summary>
     /// <param name="box"></param>
     /// <returns></returns>
@@ -72,7 +71,7 @@ internal sealed class CollisionSpatialHash {
     }
 
     /// <summary>
-    ///  Inserts a bounding box into the spatial hash.
+    ///     Inserts a bounding box into the spatial hash.
     /// </summary>
     /// <param name="index"></param>
     /// <param name="box"></param>
@@ -95,7 +94,7 @@ internal sealed class CollisionSpatialHash {
     }
 
     /// <summary>
-    ///  Recycles all buckets and cells.
+    ///     Recycles all buckets and cells.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Recycle() {
@@ -108,7 +107,7 @@ internal sealed class CollisionSpatialHash {
     }
 
     /// <summary>
-    ///  Ensures that the stamps array has at least the given size.
+    ///     Ensures that the stamps array has at least the given size.
     /// </summary>
     /// <param name="count"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -119,9 +118,9 @@ internal sealed class CollisionSpatialHash {
 
         Array.Resize(ref _stamps, Math.Max(count, _stamps.Length * 2 + 8));
     }
-    
+
     /// <summary>
-    ///  Returns the floor of the given value.
+    ///     Returns the floor of the given value.
     /// </summary>
     /// <param name="value"></param>
     /// <returns></returns>
@@ -131,7 +130,7 @@ internal sealed class CollisionSpatialHash {
     }
 
     /// <summary>
-    ///  Packs the given coordinates into a single long.
+    ///     Packs the given coordinates into a single long.
     /// </summary>
     /// <param name="x"></param>
     /// <param name="z"></param>

@@ -5,7 +5,7 @@ using Yggdrasilnet.Server.Core.World.Entities.Components;
 namespace Yggdrasilnet.Server.Core.Systems.Ai;
 
 /// <summary>
-///   Responsible for coordinating the AI group of a target entity.
+///     Responsible for coordinating the AI group of a target entity.
 /// </summary>
 public sealed class AiGroupCoordinator {
     private readonly Dictionary<int, float> _gapTimers = new();
@@ -43,7 +43,7 @@ public sealed class AiGroupCoordinator {
     public float RepositionSlotShiftInSteps { get; set; } = 0.85f;
 
     /// <summary>
-    ///  Updates the AI group coordinator.
+    ///     Updates the AI group coordinator.
     /// </summary>
     /// <param name="world"></param>
     /// <param name="dt"></param>
@@ -105,7 +105,7 @@ public sealed class AiGroupCoordinator {
     }
 
     /// <summary>
-    ///  Updates the AI group of a target entity.
+    ///     Updates the AI group of a target entity.
     /// </summary>
     /// <param name="members"></param>
     /// <param name="targetId"></param>
@@ -164,7 +164,7 @@ public sealed class AiGroupCoordinator {
     }
 
     /// <summary>
-    ///  Find nearest member that can be attacked.
+    ///     Find nearest member that can be attacked.
     /// </summary>
     /// <param name="members"></param>
     /// <returns></returns>
@@ -195,7 +195,7 @@ public sealed class AiGroupCoordinator {
     }
 
     /// <summary>
-    ///  Assigns slots to the members of the group.
+    ///     Assigns slots to the members of the group.
     /// </summary>
     /// <param name="targetId"></param>
     /// <param name="members"></param>
@@ -296,7 +296,7 @@ public sealed class AiGroupCoordinator {
     }
 
     /// <summary>
-    ///  Shuffles the order of the slots in the group.
+    ///     Shuffles the order of the slots in the group.
     /// </summary>
     /// <param name="ordered"></param>
     /// <param name="dt"></param>
@@ -350,9 +350,9 @@ public sealed class AiGroupCoordinator {
             (ordered[i], ordered[neighborIndex]) = (ordered[neighborIndex], ordered[i]);
         }
     }
-    
+
     /// <summary>
-    ///  Reassigns the token to the AI.
+    ///     Reassigns the token to the AI.
     /// </summary>
     /// <param name="ai"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -363,7 +363,7 @@ public sealed class AiGroupCoordinator {
     }
 
     /// <summary>
-    /// Wraps an angle to the range [0, 2pi]
+    ///     Wraps an angle to the range [0, 2pi]
     /// </summary>
     /// <param name="angle"></param>
     /// <returns></returns>
@@ -378,7 +378,7 @@ public sealed class AiGroupCoordinator {
     }
 
     /// <summary>
-    ///  Hash function
+    ///     Hash function
     /// </summary>
     /// <param name="a"></param>
     /// <param name="b"></param>
@@ -397,7 +397,7 @@ public sealed class AiGroupCoordinator {
     }
 
     /// <summary>
-    ///  Persists the AI group to the dimension.
+    ///     Persists the AI group to the dimension.
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="members"></param>
@@ -412,7 +412,7 @@ public sealed class AiGroupCoordinator {
     }
 
     /// <summary>
-    ///  Member of an AI group.
+    ///     Member of an AI group.
     /// </summary>
     /// <param name="EntityId"></param>
     /// <param name="Ai"></param>

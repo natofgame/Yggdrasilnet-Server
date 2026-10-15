@@ -166,7 +166,7 @@ public class Dimension : IDimension {
         }
 
         foreach (var behavior in behaviorDefinition.Behaviors)
-            behavior.Apply(this, entity.UniqueId, entity.Position);
+            behavior.Apply(this, entity.UniqueId);
     }
 
     public bool TryGetSpell(string spellId, out BehaviorDefinition definition) {

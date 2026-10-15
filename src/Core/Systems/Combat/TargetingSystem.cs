@@ -10,19 +10,19 @@ using Yggdrasilnet.Server.Core.World.Entities.Components.Living;
 namespace Yggdrasilnet.Server.Core.Systems.Combat;
 
 /// <summary>
-///  Handles targeting of entities.
+///     Handles targeting of entities.
 /// </summary>
 public sealed class TargetingSystem : ISystem {
     public const string Identifier = "targeting";
     private const float MinDirectionSq = 0.0001f;
-    
-    /// <inheritdoc/>
+
+    /// <inheritdoc />
     public string Id => Identifier;
-    
-    /// <inheritdoc/>
+
+    /// <inheritdoc />
     public SystemPhase Phase => SystemPhase.Combat;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public void Update(Dimension dimension, float dt) {
         if (!float.IsFinite(dt) || dt < 0f) {
             return;
@@ -44,7 +44,7 @@ public sealed class TargetingSystem : ISystem {
     }
 
     /// <summary>
-    ///  Tick the targeting system.
+    ///     Tick the targeting system.
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="self"></param>
@@ -88,7 +88,7 @@ public sealed class TargetingSystem : ISystem {
     }
 
     /// <summary>
-    ///  Returns the opposing layer for the given layer.
+    ///     Returns the opposing layer for the given layer.
     /// </summary>
     /// <param name="selfLayer"></param>
     /// <returns></returns>
@@ -98,7 +98,7 @@ public sealed class TargetingSystem : ISystem {
     }
 
     /// <summary>
-    ///  Tries to find the nearest entity in the given range.
+    ///     Tries to find the nearest entity in the given range.
     /// </summary>
     /// <param name="dimension"></param>
     /// <param name="self"></param>
@@ -141,7 +141,7 @@ public sealed class TargetingSystem : ISystem {
     }
 
     /// <summary>
-    ///   Applies the target to the entity.
+    ///     Applies the target to the entity.
     /// </summary>
     /// <param name="self"></param>
     /// <param name="target"></param>
@@ -164,7 +164,7 @@ public sealed class TargetingSystem : ISystem {
     }
 
     /// <summary>
-    ///  Clears the target.
+    ///     Clears the target.
     /// </summary>
     /// <param name="target"></param>
     private static void ClearTarget(ref TargetComponent target) {

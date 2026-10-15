@@ -3,7 +3,7 @@ using System.Numerics;
 namespace Yggdrasilnet.Server.Core.Systems.Ai;
 
 /// <summary>
-///  Represents the AI's combat state.
+///     Represents the AI's combat state.
 /// </summary>
 public enum AiCombatState {
     Idle,
@@ -14,7 +14,7 @@ public enum AiCombatState {
 }
 
 /// <summary>
-///  Represents the AI's intent type.
+///     Represents the AI's intent type.
 /// </summary>
 public enum AiIntentType {
     None,
@@ -24,7 +24,7 @@ public enum AiIntentType {
 }
 
 /// <summary>
-///  Represents the AI's context.
+///     Represents the AI's context.
 /// </summary>
 public readonly struct AiContext {
     public bool HasTarget { get; init; }
@@ -46,7 +46,7 @@ public readonly struct AiContext {
 }
 
 /// <summary>
-///  Represents the AI's intent.'
+///     Represents the AI's intent.'
 /// </summary>
 public readonly struct AiIntent {
     public AiIntentType Type { get; init; }

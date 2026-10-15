@@ -5,11 +5,11 @@ using Yggdrasilnet.Server.Core.World;
 namespace Yggdrasilnet.Server.Core.Registry;
 
 /// <summary>
-///  Registry for commands.
+///     Registry for commands.
 /// </summary>
 public static class CommandRegistry {
     /// <summary>
-    ///  Registers all commands.
+    ///     Registers all commands.
     /// </summary>
     /// <param name="factory"></param>
     /// <param name="world"></param>

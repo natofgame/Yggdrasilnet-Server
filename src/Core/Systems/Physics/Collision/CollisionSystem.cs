@@ -9,11 +9,11 @@ using Yggdrasilnet.Server.Core.World.Entities.Components.Movement;
 namespace Yggdrasilnet.Server.Core.Systems.Physics.Collision;
 
 /// <summary>
-///  The collision system.
+///     The collision system.
 /// </summary>
 public sealed class CollisionSystem : ISystem {
     public const string Identifier = "collision";
-    
+
     private const int SolverIterations = 3;
     private const float ContactSkin = 0.005f;
     private const float MinDisplacementSq = 1e-10f;
@@ -22,14 +22,14 @@ public sealed class CollisionSystem : ISystem {
 
     private readonly CollisionSpatialHash _hash = new();
     private readonly List<BoundingBoxes> _swept = [];
-    
-    /// <inheritdoc/>   
+
+    /// <inheritdoc />
     public string Id => Identifier;
-    
-    /// <inheritdoc/>   
+
+    /// <inheritdoc />
     public SystemPhase Phase => SystemPhase.Physics;
 
-    /// <inheritdoc/>   
+    /// <inheritdoc />
     public void Update(Dimension dimension, float dt) {
         _colliders.Clear();
         _swept.Clear();
@@ -82,7 +82,7 @@ public sealed class CollisionSystem : ISystem {
     }
 
     /// <summary>
-    ///  Attempts to resolve a collision between two colliders.
+    ///     Attempts to resolve a collision between two colliders.
     /// </summary>
     /// <param name="i"></param>
     /// <param name="j"></param>
@@ -141,9 +141,9 @@ public sealed class CollisionSystem : ISystem {
 
         return changed;
     }
-    
+
     /// <summary>
-    ///  Slides the remaining displacement of the colliders.
+    ///     Slides the remaining displacement of the colliders.
     /// </summary>
     /// <param name="destA"></param>
     /// <param name="destB"></param>
@@ -177,9 +177,9 @@ public sealed class CollisionSystem : ISystem {
             destB += RejectInward(dispB * remaining, -normal);
         }
     }
-    
+
     /// <summary>
-    ///  Rejects the displacement inward if it would put the collider into a wall.
+    ///     Rejects the displacement inward if it would put the collider into a wall.
     /// </summary>
     /// <param name="remaining"></param>
     /// <param name="normal"></param>
@@ -189,9 +189,9 @@ public sealed class CollisionSystem : ISystem {
         var intoWall = Vector3.Dot(remaining, normal);
         return intoWall < 0f ? remaining - normal * intoWall : remaining;
     }
-    
+
     /// <summary>
-    ///  Separates the colliders.
+    ///     Separates the colliders.
     /// </summary>
     /// <param name="positionA"></param>
     /// <param name="positionB"></param>

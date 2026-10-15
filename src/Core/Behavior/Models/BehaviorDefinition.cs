@@ -3,6 +3,13 @@ using Yggdrasilnet.Server.Core.Behavior.Core;
 namespace Yggdrasilnet.Server.Core.Behavior.Models;
 
 public sealed class BehaviorDefinition {
-    public string Id { get; set; } = string.Empty;
-    public List<IBehavior> Behaviors { get; set; } = [];
+    /// <summary>
+    ///     The unique identifier of the behavior.
+    /// </summary>
+    public string Id { get; init; } = string.Empty;
+
+    /// <summary>
+    ///     The behaviors of the behavior.
+    /// </summary>
+    public List<IBehavior> Behaviors { get; init; } = [];
 }

@@ -9,11 +9,11 @@ using Yggdrasilnet.Server.Core.Systems.Physics.Collision;
 namespace Yggdrasilnet.Server.Core.Registry;
 
 /// <summary>
-///  Registry for systems.
+///     Registry for systems.
 /// </summary>
 public static class SystemRegistry {
     /// <summary>
-    ///  Registers all systems.
+    ///     Registers all systems.
     /// </summary>
     /// <param name="systems"></param>
     /// <param name="behaviors"></param>

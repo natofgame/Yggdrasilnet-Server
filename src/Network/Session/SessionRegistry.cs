@@ -3,18 +3,18 @@ using LiteNetLib;
 namespace Yggdrasilnet.Server.Network.Session;
 
 /// <summary>
-///  Registry of all sessions.
+///     Registry of all sessions.
 /// </summary>
 public sealed class SessionRegistry {
     private readonly Dictionary<NetPeer, GameSession> _sessions = new();
 
     /// <summary>
-    ///  All sessions.
+    ///     All sessions.
     /// </summary>
     public IReadOnlyCollection<GameSession> All => _sessions.Values;
 
     /// <summary>
-    ///  Adds a session.
+    ///     Adds a session.
     /// </summary>
     /// <param name="session"></param>
     public void Add(GameSession session) {
@@ -22,7 +22,7 @@ public sealed class SessionRegistry {
     }
 
     /// <summary>
-    ///  Removes a session by peer.
+    ///     Removes a session by peer.
     /// </summary>
     /// <param name="peer"></param>
     /// <param name="session"></param>
@@ -32,7 +32,7 @@ public sealed class SessionRegistry {
     }
 
     /// <summary>
-    ///  Tries to get a session by peer.
+    ///     Tries to get a session by peer.
     /// </summary>
     /// <param name="peer"></param>
     /// <param name="session"></param>
