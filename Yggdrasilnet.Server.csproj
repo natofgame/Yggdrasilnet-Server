@@ -17,7 +17,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Yggdrasilnet.Maths\Yggdrasilnet.Maths.csproj"/>
-        <ProjectReference Include="..\Yggdrasilnet.NetworkV4\Yggdrasilnet.NetworkV4.csproj"/>
+        <ProjectReference Include="..\Yggdrasilnet.Network\Yggdrasilnet.Network.csproj" />
     </ItemGroup>
     <ItemGroup>
         <None Update="server.config.json" CopyToOutputDirectory="PreserveNewest"/>

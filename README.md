@@ -5,7 +5,6 @@
 <p align="center">
   <img src="https://img.shields.io/badge/version-v0.0.1-ffffff?style=for-the-badge&labelColor=0d0d0d&color=ffffff" alt="Version" />
   <img src="https://img.shields.io/badge/.NET-10.0-ffffff?style=for-the-badge&labelColor=0d0d0d&color=ffffff" alt=".NET 10.0" />
-  <img src="https://img.shields.io/badge/connection-UDP-ffffff?style=for-the-badge&labelColor=0d0d0d&color=ffffff" alt="Connection UDP" />
 </p>
 
 # 🌳 Yggdrasil Server
