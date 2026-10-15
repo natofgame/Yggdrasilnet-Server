@@ -3,13 +3,23 @@ using Serilog;
 
 namespace Yggdrasilnet.Server.Plugin;
 
+/// <summary>
+///  Plugin manager.
+/// </summary>
+/// <param name="server"></param>
 public class PluginManager(Bootstrap.Server server) {
     private const string PluginsDirector = "plugins";
     
     private readonly List<Plugin> _plugins = [];
      
+    /// <summary>
+    ///  The loaded plugins.
+    /// </summary>
     public IReadOnlyList<IYggdrasilPlugin> Plugins => _plugins.Select(p => p.Instance).ToList();
     
+    /// <summary>
+    ///  Load all plugins in the plugins directory.
+    /// </summary>
     public void LoadAll() {
         var dir = Path.GetFullPath(PluginsDirector);
         if (!Directory.Exists(dir)) {
@@ -24,7 +34,11 @@ public class PluginManager(Bootstrap.Server server) {
  
         Log.Information("[Plugin] Loaded {Count} plugins", _plugins.Count);
     }
-
+    
+    /// <summary>
+    ///  Load a single plugin.
+    /// </summary>
+    /// <param name="dllPath"></param>
     private void LoadFile(string dllPath) {
         var fullPath = Path.GetFullPath(dllPath);
         PluginContext? context = null;
@@ -39,7 +53,6 @@ public class PluginManager(Bootstrap.Server server) {
                 .ToList();
  
             if (types.Count == 0) {
-                Log.Warning("Aucun plugin trouvé dans {File}", Path.GetFileName(fullPath));
                 context.Unload();
                 return;
             }
@@ -59,6 +72,13 @@ public class PluginManager(Bootstrap.Server server) {
         }
     }
     
+    /// <summary>
+    ///  Try to load a type as a plugin.
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="context"></param>
+    /// <param name="path"></param>
+    /// <returns></returns>
     private bool TryLoadType(Type type, PluginContext context, string path) {
         try {
             if (Activator.CreateInstance(type) is not IYggdrasilPlugin instance) {
@@ -84,6 +104,10 @@ public class PluginManager(Bootstrap.Server server) {
         }
     }
     
+    /// <summary>
+    ///  Enable all plugins.
+    /// </summary>
+    /// <param name="plugin"></param>
     private void Enable(Plugin plugin) {
         if (plugin.Enabled) {
             return;
@@ -99,12 +123,18 @@ public class PluginManager(Bootstrap.Server server) {
         }
     }
 
+    /// <summary>
+    ///  Enable all plugins.
+    /// </summary>
     public void EnableAll() {
         foreach (var plugin in _plugins) {
             Enable(plugin);
         }
     }
 
+    /// <summary>
+    ///  Disable all plugins.
+    /// </summary>
     public void DisableAll() {
         for (var i = _plugins.Count - 1; i >= 0; i--) {
             Disable(_plugins[i]);
@@ -117,6 +147,10 @@ public class PluginManager(Bootstrap.Server server) {
         _plugins.Clear();
     }
     
+    /// <summary>
+    ///  Disable a plugin.
+    /// </summary>
+    /// <param name="plugin"></param>
     private void Disable(Plugin plugin) {
         if (!plugin.Enabled) {
             return;

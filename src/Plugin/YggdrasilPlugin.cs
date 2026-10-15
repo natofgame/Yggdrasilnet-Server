@@ -3,16 +3,22 @@
 namespace Yggdrasilnet.Server.Plugin;
 
 public abstract class YggdrasilPlugin : IYggdrasilPlugin {
-    private PluginAttribute? _metadata;
-
-    public PluginAttribute Metadata => _metadata ??=
+    /// <summary>
+    ///  The metadata of the plugin.
+    /// </summary>
+    /// <exception cref="InvalidOperationException"></exception>
+    private PluginAttribute Metadata => field ??=
         GetType().GetCustomAttribute<PluginAttribute>()
-        ?? throw new InvalidOperationException(
-            $"Le plugin {GetType().FullName} doit être décoré avec [Plugin(\"id\")].");
+        ?? throw new InvalidOperationException("Plugin metadata not found.");
 
+    /// <inheritdoc/>
     public string Id => Metadata.Id;
 
+    /// <inheritdoc/>
     public virtual void OnLoad(Bootstrap.Server server) { }
+    
+    /// <inheritdoc/>
     public virtual void OnEnable(Bootstrap.Server server) { }
+    
     public virtual void OnDisable(Bootstrap.Server server) { }
 }
