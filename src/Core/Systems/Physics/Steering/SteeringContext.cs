@@ -178,7 +178,7 @@ internal sealed class SteeringContext {
             }
 
             foreach (var other in bucket) {
-                if (other.Entity.Id == agent.Entity.Id) {
+                if (other.Entity.UniqueId == agent.Entity.UniqueId) {
                     continue;
                 }
 

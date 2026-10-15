@@ -9,12 +9,13 @@ namespace Yggdrasilnet.Server.Core.World.Entities;
 public class Entity : IEntity {
     private static int _nextId;
 
-    public Entity(string id, Vector3 position, IDimension? dimension = null) {
+    public Entity(string id, Vector3 position, IDimension? dimension = null, int uniqueId = -1) {
         if (string.IsNullOrWhiteSpace(id)) {
             throw new ArgumentException("Definition ID cannot be null or empty", nameof(id));
         }
 
-        UniqueId = Interlocked.Increment(ref _nextId);
+        UniqueId = uniqueId == -1 ? Interlocked.Increment(ref _nextId) : uniqueId;
+        
         Id = id;
         Position = position;
         PreviousPosition = position;
@@ -92,7 +93,7 @@ public class Entity : IEntity {
             storeObj.Remove(UniqueId);
     }
 
-    public Player ToPlayer() => (Player)this;
+    public Player ToPlayer() => new(this);
 
     public override string ToString() {
         return $"Entity#{UniqueId} [{Id}] @ {Position}";

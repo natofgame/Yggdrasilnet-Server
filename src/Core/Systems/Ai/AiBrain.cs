@@ -252,7 +252,7 @@ public static class AiBrain {
 
         foreach (var other in dimension.Query<CollisionComponent>()) {
             var collider = other.Get<CollisionComponent>();
-            if (other.Id == self.Id || collider.Layer != CollisionLayer.Player) {
+            if (other.UniqueId == self.UniqueId || collider.Layer != CollisionLayer.Player) {
                 continue;
             }
 
