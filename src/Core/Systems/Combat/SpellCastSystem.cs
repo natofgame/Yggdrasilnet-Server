@@ -65,17 +65,13 @@ public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
         }
     }
 
-    // TODO: Refacto this
-    /*
-    /// <summary>
-    ///     Handles the request to cast a spell.
-    /// </summary>
-    /// <param name="e"></param>
-    [SubscribeWorldEvent]
-    private void OnSpellCastRequest(SpellCastRequestEvent e) {
-        _pendingCasts.Enqueue((e.EntityId, e.SlotIndex));
-    }*/
+    public void EnqueueCast(int entityId, int slotIndex) {
+        if (entityId <= 0 || slotIndex < 0) {
+            return;
+        }
 
+        _pendingCasts.Enqueue((entityId, slotIndex));
+    }
     /// <summary>
     ///     Handles the request to cancel a spell.
     /// </summary>

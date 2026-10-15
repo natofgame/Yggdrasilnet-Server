@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Yggdrasilnet.Server.Core.Components;
+using Yggdrasilnet.Server.Core.Systems;
 using Yggdrasilnet.Server.Core.World.Entities;
 
 namespace Yggdrasilnet.Server.Core.World.Dimensions;
@@ -35,4 +36,6 @@ public interface IDimension {
     bool LoadChunk(int chunkX, int chunkZ);
     bool UnloadChunk(int chunkX, int chunkZ);
     bool IsChunkLoaded(int chunkX, int chunkZ);
+
+    T? GetSystem<T>() where T : class, ISystem;
 }

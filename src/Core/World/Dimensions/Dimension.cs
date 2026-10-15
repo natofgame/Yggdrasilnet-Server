@@ -180,6 +180,10 @@ public class Dimension : IDimension {
     private static long ToChunkKey(int chunkX, int chunkZ) {
         return ((long)chunkX << 32) | (uint)chunkZ;
     }
+    
+    public T? GetSystem<T>() where T : class, ISystem {
+        return _systems.Get<T>();
+    }
 
     internal void OnEntityComponentChanged(Entity entity, Type componentType, object component) {
         IndexEntity(entity.UniqueId, componentType);

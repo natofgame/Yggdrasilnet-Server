@@ -3,6 +3,8 @@ using Yggdrasilnet.NetworkV4.Packets;
 using Yggdrasilnet.Server.Core;
 using Yggdrasilnet.Server.Core.Command;
 using Yggdrasilnet.Server.Core.Services;
+using Yggdrasilnet.Server.Core.Systems.Combat;
+using Yggdrasilnet.Server.Core.World.Dimensions;
 using Yggdrasilnet.Server.Network.Session;
 
 namespace Yggdrasilnet.Server.Network.Handler;
@@ -20,6 +22,7 @@ public sealed class GameHandler(
     /// <inheritdoc />
     public override void Handle(RequestProtocolPacket packet) {
         Log.Debug("RequestProtocol ignored in game phase for {EndPoint}", session.Peer.Address);
+        
     }
 
     /// <inheritdoc />
@@ -29,14 +32,16 @@ public sealed class GameHandler(
 
     /// <inheritdoc />
     public override void Handle(CastSpellPacket packet) {
-        if (!session.TryGetEntityBinding(out var entityId, out var _)) {
+        if (!session.TryGetEntityBinding(out var entityId, out var dimensionName)) {
             Log.Debug("CastSpell from {EndPoint} ignored: no bound entity.", session.Peer.Address);
             return;
         }
 
-        // TODO: implement
-        //simulation.Server.Event.Publish(new SpellCastRequestEvent(entityId, packet.SpellIndex));
-
+        if (simulation.World.TryGetDimension(dimensionName, out var dimension)) {
+            var spells = dimension.GetSystem<SpellCastSystem>();
+            spells?.EnqueueCast(entityId, packet.SpellIndex);
+        }
+        
         Log.Debug("CastSpell from {EndPoint}: slot={SpellIndex}",
             session.Peer.Address, packet.SpellIndex);
     }

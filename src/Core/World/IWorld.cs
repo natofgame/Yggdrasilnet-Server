@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Yggdrasilnet.Server.Core.Behavior.Registry;
 using Yggdrasilnet.Server.Core.Components;
@@ -15,7 +16,7 @@ public interface IWorld {
     IReadOnlyCollection<IDimension> Dimensions { get; }
 
     Dimension CreateDimension(string id, SystemPipeline? systems = null, bool isMain = false);
-    bool TryGetDimension(string id, out IDimension? dimension);
+    bool TryGetDimension(string id, [NotNullWhen(true)] out IDimension? dimension);
     IDimension GetDimension(string id);
 
     Entity Spawn(string definitionId, Vector3 position);

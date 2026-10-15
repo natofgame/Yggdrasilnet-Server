@@ -51,4 +51,18 @@ public sealed class SystemPipeline {
                 system.Update(dimension, dt);
         }
     }
+    
+    /// <summary>
+    ///  Gets a system by type.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public T? Get<T>() where T : class, ISystem {
+        foreach (var system in _systemsByPhase.Values.SelectMany(systems => systems))
+            if (system is T typed) {
+                return typed;
+            }
+
+        return null;
+    }
 }
