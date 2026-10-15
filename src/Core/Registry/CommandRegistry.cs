@@ -1,5 +1,5 @@
+using Yggdrasilnet.Server.Core.Command;
 using Yggdrasilnet.Server.Core.Command.Commands;
-using Yggdrasilnet.Server.Core.Commands;
 using Yggdrasilnet.Server.Core.World;
 
 namespace Yggdrasilnet.Server.Core.Registry;

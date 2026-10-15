@@ -1,7 +1,6 @@
 using System.Reflection;
-using Yggdrasilnet.Server.Core.Command;
 
-namespace Yggdrasilnet.Server.Core.Commands;
+namespace Yggdrasilnet.Server.Core.Command;
 
 public class CommandFactory {
     private readonly ArgumentBinderRegistry _binders = new();

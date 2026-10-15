@@ -14,6 +14,7 @@ public sealed class EventBus {
     public void Register(object listener) {
         var type = listener.GetType();
         var methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        var touchedLists = new HashSet<List<Subscription>>();
 
         foreach (var method in methods) {
             var attribute = method.GetCustomAttribute<SubscribeEventAttribute>();
@@ -24,7 +25,7 @@ public sealed class EventBus {
             var parameters = method.GetParameters();
             if (parameters.Length != 1 || !typeof(IEvent).IsAssignableFrom(parameters[0].ParameterType)) {
                 _onError(new InvalidOperationException(
-                    $"{type.Name}.{method.Name}: invalid signature for [SubscribeWorldEvent] " +
+                    $"{type.Name}.{method.Name}: invalid signature for [SubscribeEvent] " +
                     "(expected: void Method(XxxEvent e))"));
                 continue;
             }
@@ -38,6 +39,10 @@ public sealed class EventBus {
             }
 
             list.Add(new Subscription(listener, attribute.Priority, invoker));
+            touchedLists.Add(list);
+        }
+
+        foreach (var list in touchedLists) {
             list.Sort((a, b) => a.Priority.CompareTo(b.Priority));
         }
     }

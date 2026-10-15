@@ -1,4 +1,4 @@
-﻿using Yggdrasilnet.Server.Event.Types;
+using Yggdrasilnet.Server.Event.Types;
 
 namespace Yggdrasilnet.Server.Event.Events.Server;
 
@@ -6,5 +6,5 @@ namespace Yggdrasilnet.Server.Event.Events.Server;
 ///  Event triggered when the server stops.
 /// </summary>
 public class ServerStopEvent : ServerEvent {
-    protected ServerStopEvent(Bootstrap.Server server) : base(server) { }
+    public ServerStopEvent(Bootstrap.Server server) : base(server) { }
 }

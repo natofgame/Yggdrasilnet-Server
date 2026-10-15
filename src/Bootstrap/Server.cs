@@ -2,15 +2,17 @@ using System.Collections.Concurrent;
 using Serilog;
 using Yggdrasilnet.NetworkV4.Protocol;
 using Yggdrasilnet.Server.Core;
+using Yggdrasilnet.Server.Core.Command;
 using Yggdrasilnet.Server.Event;
 using Yggdrasilnet.Server.Network;
+using Yggdrasilnet.Server.Plugin;
 
 namespace Yggdrasilnet.Server.Bootstrap;
 
 /// <summary>
 ///     Hosts the game server as a managed application service.
 /// </summary>
-public sealed class Server(int port, int tickRate) : IHostedService, IDisposable {
+public sealed class Server(int port, int tickRate) : IHostedService, IDisposable, IServer {
     private readonly ConcurrentQueue<IServerEvent> _events = new();
     private Thread? _consoleThread;
     private bool _disposed;
@@ -19,8 +21,11 @@ public sealed class Server(int port, int tickRate) : IHostedService, IDisposable
     private CancellationTokenSource? _runCts;
 
     private ServerTransport? _server;
-    private Simulation? _simulation;
     private bool _stopped;
+
+    public Simulation Simulation { get; private set; } = null!;
+    
+    public PluginManager Plugins { get; private set; } = null!;
 
     public readonly EventManager Event = new(); 
 
@@ -44,10 +49,14 @@ public sealed class Server(int port, int tickRate) : IHostedService, IDisposable
         ProtocolRegistry.Registers();
 
         _server = new ServerTransport(_events);
-        _simulation = new Simulation(this, _events, _server, tickRate);
-        _loop = new GameLoop(_server, _simulation, tickRate);
+        Simulation = new Simulation(this, _events, _server, tickRate);
+        _loop = new GameLoop(_server, Simulation, tickRate);
 
+        Plugins = new PluginManager(this);
+        Plugins.LoadAll();
+        
         _server.Start(port);
+        Plugins.EnableAll();
         Log.Information("Game loop running at {TickRate} tps", tickRate);
 
         _runCts = new CancellationTokenSource();
@@ -73,6 +82,8 @@ public sealed class Server(int port, int tickRate) : IHostedService, IDisposable
 
         _stopped = true;
         _runCts?.Cancel();
+        
+        Plugins.DisableAll();
 
         if (_consoleThread is not null && _consoleThread.IsAlive) {
             _consoleThread.Join(TimeSpan.FromSeconds(2));

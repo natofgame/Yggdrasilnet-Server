@@ -4,7 +4,6 @@ using Serilog;
 using Yggdrasilnet.NetworkV4.Protocol;
 using Yggdrasilnet.Server.Core.Behavior.Registry;
 using Yggdrasilnet.Server.Core.Command;
-using Yggdrasilnet.Server.Core.Commands;
 using Yggdrasilnet.Server.Core.Registry;
 using Yggdrasilnet.Server.Core.Services;
 using Yggdrasilnet.Server.Core.Systems;
@@ -154,7 +153,9 @@ public sealed class Simulation {
 
         // TODO: Handle disconnection gracefully
         if (session.TryGetEntityBinding(out var entityId, out var dimensionName)) {
-            Server.Event.Publish(new PlayerLeaveEvent(entityId));
+            if (World.TryResolveEntity(entityId, out var entity) && entity is Player player) {
+                Server.Event.Publish(new PlayerLeaveEvent(player));
+            }
 
             World.TryDespawn(dimensionName, entityId);
             session.ClearEntityBinding();

@@ -1,36 +1,57 @@
-﻿namespace Yggdrasilnet.Server.Event;
+using System.Collections.Concurrent;
+using Serilog;
+
+namespace Yggdrasilnet.Server.Event;
 
 public sealed class EventManager {
-    private readonly EventBus _eventBus = new(_ => { });
-    private readonly Queue<IEvent> _queue = new();
-    private bool _flushing;
+    private readonly EventBus _eventBus;
+    private readonly ConcurrentQueue<IEvent> _queue = new();
+    private int _flushing;
+
+    public EventManager() {
+        _eventBus = new(eventException => Log.Error(eventException, "Event handler threw an exception"));
+    }
 
     /// <summary>
-    ///  Publishes an event.
+    /// Registers all event handlers declared on the given listener.
+    /// </summary>
+    /// <param name="listener"></param>
+    public void Register(object listener) {
+        _eventBus.Register(listener);
+    }
+
+    /// <summary>
+    /// Unregisters all event handlers declared on the given listener.
+    /// </summary>
+    /// <param name="listener"></param>
+    public void Unregister(object listener) {
+        _eventBus.Unregister(listener);
+    }
+
+    /// <summary>
+    /// Publishes an event.
     /// </summary>
     /// <param name="event"></param>
     public void Publish(IEvent @event) {
         ArgumentNullException.ThrowIfNull(@event);
         _queue.Enqueue(@event);
-        Flush(_eventBus);
+        Flush();
     }
 
     /// <summary>
     /// Flushes the event queue.
     /// </summary>
-    /// <param name="bus"></param>
-    private void Flush(EventBus bus) {
-        if (_flushing) {
+    private void Flush() {
+        if (Interlocked.Exchange(ref _flushing, 1) == 1) {
             return;
         }
 
-        _flushing = true;
         try {
-            while (_queue.Count > 0)
-                bus.Post(_queue.Dequeue());
+            while (_queue.TryDequeue(out var @event))
+                _eventBus.Post(@event);
         }
         finally {
-            _flushing = false;
+            Interlocked.Exchange(ref _flushing, 0);
         }
     }
 }
