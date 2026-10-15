@@ -37,7 +37,7 @@ public sealed class SpellTargetingBehavior : IBehavior {
 
     public CollisionLayer ResolvedTargetLayer => CollisionLayerParser.Parse(TargetLayer);
 
-    void IBehavior.Apply(Dimension dimension, int entityId, Vector3 spawnPosition) { }
+    void IBehavior.Apply(Dimension dimension, int entityId) { }
 
     public void Validate() {
         BehaviorValidation.EnsureNonNegative(Range, "targeting.range");

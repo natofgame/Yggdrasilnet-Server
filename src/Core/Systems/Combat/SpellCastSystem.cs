@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Yggdrasilnet.NetworkV4.Enums;
 using Yggdrasilnet.Server.Core.Behavior.Models;
 using Yggdrasilnet.Server.Core.Behavior.Registry;
@@ -20,7 +21,12 @@ using CollisionLayer = Yggdrasilnet.NetworkV4.Enums.CollisionLayer;
 
 namespace Yggdrasilnet.Server.Core.Systems.Combat;
 
-public sealed class SpellCastSystem : IWorldSystem {
+/// <summary>
+///     Handles casting of spells.
+/// </summary>
+/// <param name="behaviors"></param>
+public sealed class SpellCastSystem(BehaviorPackRegistry behaviors) : ISystem {
+    public const string Identifier = "spell_cast";
     private const float MinDirectionSq = 0.0001f;
     private const float InterceptEpsilon = 0.0001f;
 
@@ -31,16 +37,16 @@ public sealed class SpellCastSystem : IWorldSystem {
         [SpellEffectType.Punch] = new PunchEffectHandler()
     };
 
-    private readonly BehaviorPackRegistry _behaviors;
+    private readonly BehaviorPackRegistry _behaviors = behaviors ?? throw new ArgumentNullException(nameof(behaviors));
     private readonly Queue<(int EntityId, int SlotIndex)> _pendingCasts = new();
 
-    public SpellCastSystem(BehaviorPackRegistry behaviors) {
-        _behaviors = behaviors ?? throw new ArgumentNullException(nameof(behaviors));
-    }
+    /// <inheritdoc />
+    public string Id => Identifier;
 
-    public string Id => "spell_cast";
-    public WorldSystemPhase Phase => WorldSystemPhase.Combat;
+    /// <inheritdoc />
+    public SystemPhase Phase => SystemPhase.Combat;
 
+    /// <inheritdoc />
     public void Update(Dimension dimension, float dt) {
         DrainPendingCasts(dimension);
 
@@ -61,11 +67,19 @@ public sealed class SpellCastSystem : IWorldSystem {
         }
     }
 
+    /// <summary>
+    ///     Handles the request to cast a spell.
+    /// </summary>
+    /// <param name="e"></param>
     [SubscribeWorldEvent]
     private void OnSpellCastRequest(SpellCastRequestEvent e) {
         _pendingCasts.Enqueue((e.EntityId, e.SlotIndex));
     }
 
+    /// <summary>
+    ///     Handles the request to cancel a spell.
+    /// </summary>
+    /// <param name="dimension"></param>
     private void DrainPendingCasts(Dimension dimension) {
         while (_pendingCasts.Count > 0) {
             var (entityId, slotIndex) = _pendingCasts.Dequeue();
@@ -73,6 +87,12 @@ public sealed class SpellCastSystem : IWorldSystem {
         }
     }
 
+    /// <summary>
+    ///     Tries to begin casting a spell.
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="entityId"></param>
+    /// <param name="slotIndex"></param>
     private void TryBeginCast(Dimension dimension, int entityId, int slotIndex) {
         if (!dimension.TryGetEntity(entityId, out var entity)) {
             return;
@@ -138,6 +158,11 @@ public sealed class SpellCastSystem : IWorldSystem {
         entity.Set(combat);
     }
 
+    /// <summary>
+    ///     Tries to cast a spell.
+    /// </summary>
+    /// <param name="charges"></param>
+    /// <param name="slot"></param>
     private static void EnsureInitialized(SpellChargesBehavior? charges, ref CombatSlot slot) {
         if (slot.Initialized) {
             return;
@@ -150,6 +175,11 @@ public sealed class SpellCastSystem : IWorldSystem {
         }
     }
 
+    /// <summary>
+    ///     Consumes a charge from a spell.
+    /// </summary>
+    /// <param name="charges"></param>
+    /// <param name="slot"></param>
     private static void ConsumeCharges(SpellChargesBehavior? charges, ref CombatSlot slot) {
         if (charges is null || charges.ResolvedType != SpellChargePolicyType.Regenerating || charges.MaxCharges <= 0) {
             return;
@@ -161,6 +191,11 @@ public sealed class SpellCastSystem : IWorldSystem {
         }
     }
 
+    /// <summary>
+    ///     Starts a cooldown for a spell.
+    /// </summary>
+    /// <param name="spellDef"></param>
+    /// <param name="slot"></param>
     private static void StartCooldown(BehaviorDefinition spellDef, ref CombatSlot slot) {
         if (!spellDef.TryGetBehavior<SpellCooldownBehavior>(out var cooldown)
             || cooldown.ResolvedType != SpellCooldownPolicyType.Fixed
@@ -171,6 +206,11 @@ public sealed class SpellCastSystem : IWorldSystem {
         slot.CooldownRemaining = cooldown.DurationSeconds;
     }
 
+    /// <summary>
+    ///     Applies stacks to a spell.
+    /// </summary>
+    /// <param name="spellDef"></param>
+    /// <param name="slot"></param>
     private static void ApplyCastStacks(BehaviorDefinition spellDef, ref CombatSlot slot) {
         if (!spellDef.TryGetBehavior<SpellStacksBehavior>(out var stacks)
             || stacks.ResolvedType != SpellStackPolicyType.Additive
@@ -184,6 +224,11 @@ public sealed class SpellCastSystem : IWorldSystem {
         }
     }
 
+    /// <summary>
+    ///     Tick the spell casting system.
+    /// </summary>
+    /// <param name="combat"></param>
+    /// <param name="dt"></param>
     private void TickSlots(ref CombatComponent combat, float dt) {
         for (var i = 0; i < combat.Slots.Length; i++) {
             var slot = combat.Slots[i];
@@ -213,6 +258,12 @@ public sealed class SpellCastSystem : IWorldSystem {
         }
     }
 
+    /// <summary>
+    ///     Tick the spell casting system.
+    /// </summary>
+    /// <param name="charges"></param>
+    /// <param name="slot"></param>
+    /// <param name="dt"></param>
     private static void TickCharges(SpellChargesBehavior charges, ref CombatSlot slot, float dt) {
         if (slot.ChargesCurrent >= charges.MaxCharges || charges.RecoverySeconds <= 0f) {
             slot.ChargeRecoveryRemaining = 0f;
@@ -231,6 +282,14 @@ public sealed class SpellCastSystem : IWorldSystem {
         }
     }
 
+    /// <summary>
+    ///     Tick the spell casting system.
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="caster"></param>
+    /// <param name="combat"></param>
+    /// <param name="dt"></param>
+    /// <exception cref="Exception"></exception>
     private void TickActiveCast(Dimension dimension, Entity caster, ref CombatComponent combat, float dt) {
         if (!_behaviors.TryGetSpell(combat.CastSpellId, out var spellDef)
             || !spellDef.TryGetBehavior<SpellTimingBehavior>(out var timing)
@@ -277,6 +336,10 @@ public sealed class SpellCastSystem : IWorldSystem {
         }
     }
 
+    /// <summary>
+    ///     Resets the spell casting system.
+    /// </summary>
+    /// <param name="combat"></param>
     private static void ResetCast(ref CombatComponent combat) {
         combat.IsCasting = false;
         combat.CastSlot = -1;
@@ -286,6 +349,14 @@ public sealed class SpellCastSystem : IWorldSystem {
         combat.PhaseDuration = 0f;
     }
 
+    /// <summary>
+    ///     Applies a phase to a spell.
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="caster"></param>
+    /// <param name="combat"></param>
+    /// <param name="spellDef"></param>
+    /// <param name="phase"></param>
     private void ApplyPhase(
         Dimension dimension,
         Entity caster,
@@ -316,6 +387,14 @@ public sealed class SpellCastSystem : IWorldSystem {
         }
     }
 
+    /// <summary>
+    ///     Applies effects to the caster.
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="context"></param>
+    /// <param name="caster"></param>
+    /// <param name="effects"></param>
+    /// <param name="phase"></param>
     private static void ApplySelfEffects(
         Dimension dimension,
         SpellCastContext context,
@@ -332,6 +411,15 @@ public sealed class SpellCastSystem : IWorldSystem {
         }
     }
 
+    /// <summary>
+    ///     Applies effects to the target.
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="context"></param>
+    /// <param name="caster"></param>
+    /// <param name="targeting"></param>
+    /// <param name="effects"></param>
+    /// <param name="phase"></param>
     private static void ApplyTargetEffects(
         Dimension dimension,
         SpellCastContext context,
@@ -367,6 +455,13 @@ public sealed class SpellCastSystem : IWorldSystem {
         }
     }
 
+    /// <summary>
+    ///     Applies a stack to a spell.
+    /// </summary>
+    /// <param name="effect"></param>
+    /// <param name="phase"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsActive(SpellEffectEntry effect, SpellPhase phase) {
         return phase switch {
             SpellPhase.Anticipation => effect.ActiveOnAnticipation,
@@ -375,6 +470,14 @@ public sealed class SpellCastSystem : IWorldSystem {
         };
     }
 
+    /// <summary>
+    ///     Applies a stack to a spell.
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="caster"></param>
+    /// <param name="context"></param>
+    /// <param name="spellDef"></param>
+    /// <param name="projectile"></param>
     private static void SpawnProjectile(
         Dimension dimension,
         Entity caster,
@@ -412,6 +515,11 @@ public sealed class SpellCastSystem : IWorldSystem {
         });
     }
 
+    /// <summary>
+    ///     Resolves the direction of a spell.
+    /// </summary>
+    /// <param name="spellDef"></param>
+    /// <returns></returns>
     private static float ResolveProjectileDamage(BehaviorDefinition spellDef) {
         if (!spellDef.TryGetBehavior<SpellEffectsBehavior>(out var effects)) {
             return 0f;
@@ -425,6 +533,14 @@ public sealed class SpellCastSystem : IWorldSystem {
         return 0f;
     }
 
+    /// <summary>
+    ///     Resolves the direction of a spell.
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="caster"></param>
+    /// <param name="casterPosition"></param>
+    /// <param name="spellDef"></param>
+    /// <returns></returns>
     private static Vector3 ResolveDirection(
         Dimension dimension,
         Entity caster,
@@ -459,6 +575,16 @@ public sealed class SpellCastSystem : IWorldSystem {
         return flat.LengthSquared() > MinDirectionSq ? Vector3.Normalize(flat) : Vector3.UnitZ;
     }
 
+    /// <summary>
+    ///     Determines if the spell can be cast.
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="caster"></param>
+    /// <param name="casterPosition"></param>
+    /// <param name="projectile"></param>
+    /// <param name="enemyLayer"></param>
+    /// <param name="direction"></param>
+    /// <returns></returns>
     private static bool TryResolveProjectileLeadDirection(
         Dimension dimension,
         Entity caster,
@@ -500,6 +626,15 @@ public sealed class SpellCastSystem : IWorldSystem {
         return true;
     }
 
+    /// <summary>
+    ///     Resolves the direction of a spell.
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="caster"></param>
+    /// <param name="casterPosition"></param>
+    /// <param name="enemyLayer"></param>
+    /// <param name="direction"></param>
+    /// <returns></returns>
     private static bool TryResolveTargetDirection(
         Dimension dimension,
         Entity caster,
@@ -530,6 +665,11 @@ public sealed class SpellCastSystem : IWorldSystem {
         return true;
     }
 
+    /// <summary>
+    ///     Resolves the direction of a spell.
+    /// </summary>
+    /// <param name="spellDef"></param>
+    /// <returns></returns>
     private static float ResolveAimRadius(BehaviorDefinition spellDef) {
         if (!spellDef.TryGetBehavior<SpellTargetingBehavior>(out var targeting)) {
             return float.MaxValue;
@@ -540,14 +680,22 @@ public sealed class SpellCastSystem : IWorldSystem {
         var extentX = MathF.Max(MathF.Abs(min.X), MathF.Abs(max.X));
         var extentZ = MathF.Max(MathF.Abs(min.Z), MathF.Abs(max.Z));
 
-        if (targeting.CardinalHitBoxMin is { } cardMin && targeting.CardinalHitBoxMax is { } cardMax) {
-            extentX = MathF.Max(extentX, MathF.Max(MathF.Abs(cardMin.X), MathF.Abs(cardMax.X)));
-            extentZ = MathF.Max(extentZ, MathF.Max(MathF.Abs(cardMin.Z), MathF.Abs(cardMax.Z)));
+        if (targeting.CardinalHitBoxMin is not { } cardMin || targeting.CardinalHitBoxMax is not { } cardMax) {
+            return MathF.Max(0f, targeting.Range) + MathF.Max(extentX, extentZ);
         }
+
+        extentX = MathF.Max(extentX, MathF.Max(MathF.Abs(cardMin.X), MathF.Abs(cardMax.X)));
+        extentZ = MathF.Max(extentZ, MathF.Max(MathF.Abs(cardMin.Z), MathF.Abs(cardMax.Z)));
 
         return MathF.Max(0f, targeting.Range) + MathF.Max(extentX, extentZ);
     }
 
+    /// <summary>
+    ///     Resole Enemy Layer
+    /// </summary>
+    /// <param name="entity"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static CollisionLayer ResolveEnemyLayer(Entity entity) {
         if (entity.TryGet<CollisionComponent>(out var collider) && collider.Layer == CollisionLayer.Player) {
             return CollisionLayer.Monster;
@@ -556,6 +704,16 @@ public sealed class SpellCastSystem : IWorldSystem {
         return CollisionLayer.Player;
     }
 
+    /// <summary>
+    ///     Determines if the spell can be cast.
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="casterId"></param>
+    /// <param name="casterPosition"></param>
+    /// <param name="enemyLayer"></param>
+    /// <param name="range"></param>
+    /// <param name="position"></param>
+    /// <returns></returns>
     private static bool TryFindNearestEnemy(
         Dimension dimension,
         int casterId,
@@ -591,13 +749,21 @@ public sealed class SpellCastSystem : IWorldSystem {
         return found;
     }
 
+    /// <summary>
+    ///     Try Resolve Locked Target Entity
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="caster"></param>
+    /// <param name="enemyLayer"></param>
+    /// <param name="target"></param>
+    /// <returns></returns>
     private static bool TryResolveLockedTargetEntity(
         Dimension dimension,
         Entity caster,
         CollisionLayer enemyLayer,
         [NotNullWhen(true)] out Entity? target
     ) {
-        target = default;
+        target = null;
         if (!caster.TryGet<TargetComponent>(out var lockState) || !lockState.EntityId.HasValue) {
             return false;
         }
@@ -612,6 +778,11 @@ public sealed class SpellCastSystem : IWorldSystem {
         return !target.TryGet<LivingComponent>(out var living) || living.IsAlive;
     }
 
+    /// <summary>
+    ///     Determines if the spell can be cast.
+    /// </summary>
+    /// <param name="entity"></param>
+    /// <returns></returns>
     private static Vector3 ResolvePlanarVelocity(Entity entity) {
         if (!entity.TryGet<MovementComponent>(out var movement)) {
             return Vector3.Zero;
@@ -620,6 +791,11 @@ public sealed class SpellCastSystem : IWorldSystem {
         return movement.Velocity with { Y = 0f };
     }
 
+    /// <summary>
+    ///     Determines if the spell can be cast.
+    /// </summary>
+    /// <param name="rawDirection"></param>
+    /// <returns></returns>
     private static Vector3 ResolvePlanarDirection(Vector3 rawDirection) {
         var flat = rawDirection with { Y = 0f };
         return flat.LengthSquared() > MinDirectionSq
@@ -627,6 +803,14 @@ public sealed class SpellCastSystem : IWorldSystem {
             : Vector3.UnitZ;
     }
 
+    /// <summary>
+    ///     Determines if the spell can be cast.
+    /// </summary>
+    /// <param name="offset"></param>
+    /// <param name="relativeVelocity"></param>
+    /// <param name="projectileSpeed"></param>
+    /// <param name="t"></param>
+    /// <returns></returns>
     private static bool TrySolveInterceptTime(Vector3 offset, Vector3 relativeVelocity, float projectileSpeed,
         out float t) {
         t = 0f;

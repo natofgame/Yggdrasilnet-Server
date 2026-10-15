@@ -1,4 +1,3 @@
-using System.Numerics;
 using Yggdrasilnet.NetworkV4.Enums;
 using Yggdrasilnet.Server.Core.Behavior.Core;
 using Yggdrasilnet.Server.Core.World.Dimensions;
@@ -14,7 +13,7 @@ public sealed class SpellMetaBehavior : IBehavior {
         ? value
         : throw new InvalidDataException($"Unknown spell type '{Type}'.");
 
-    void IBehavior.Apply(Dimension dimension, int entityId, Vector3 spawnPosition) { }
+    void IBehavior.Apply(Dimension dimension, int entityId) { }
 
     public void Validate() {
         BehaviorValidation.EnsureNonNegative(CastMoveSpeedReductionPercent, "meta.castMoveSpeedReductionPercent");

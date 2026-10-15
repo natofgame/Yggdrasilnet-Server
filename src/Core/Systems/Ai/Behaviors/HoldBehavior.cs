@@ -5,6 +5,9 @@ using Yggdrasilnet.Server.Core.World.Entities.Components;
 
 namespace Yggdrasilnet.Server.Core.Systems.Ai.Behaviors;
 
+/// <summary>
+///     Holds the target.
+/// </summary>
 public sealed class HoldBehavior : AiBehavior {
     public float Speed { get; set; } = 4f;
     public float BaseRadius { get; set; } = 3.5f;
@@ -16,9 +19,13 @@ public sealed class HoldBehavior : AiBehavior {
     public float OrbitWanderJitter { get; set; } = 0.8f;
     public float SeparationRadius { get; set; } = 1.15f;
 
+    /// <inheritdoc />
     public override AiCombatState State => AiCombatState.Reposition;
+
+    /// <inheritdoc />
     public override float TransitionLockDuration => 0.8f;
 
+    /// <inheritdoc />
     public override float Evaluate(in AiContext context, in BrainComponent ai) {
         if (!context.HasTarget || context.HasAttackToken) {
             return 0f;
@@ -28,6 +35,7 @@ public sealed class HoldBehavior : AiBehavior {
         return 0.4f + context.Prudence01 * 0.3f + allyFactor * 0.2f;
     }
 
+    /// <inheritdoc />
     public override AiIntent BuildIntent(
         Dimension dimension,
         Entity entity,

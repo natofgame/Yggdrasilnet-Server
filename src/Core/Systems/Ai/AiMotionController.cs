@@ -4,14 +4,28 @@ using Yggdrasilnet.Server.Core.World.Entities.Components.Movement;
 
 namespace Yggdrasilnet.Server.Core.Systems.Ai;
 
+/// <summary>
+///     Handles applying AI intents to the entity.
+/// </summary>
 public static class AiMotionController {
     private const float DefaultNeighborAvoidRadius = 1.35f;
     private const float DefaultNeighborAvoidWeight = 1.1f;
 
+    /// <summary>
+    ///     Stops the entity.
+    /// </summary>
+    /// <param name="input"></param>
+    /// <param name="movement"></param>
     public static void Stop(ref InputComponent input, ref MovementComponent movement) {
         Apply(ref input, ref movement, AiIntent.Stop(true));
     }
 
+    /// <summary>
+    ///     Applies the given intent to the entity.
+    /// </summary>
+    /// <param name="input"></param>
+    /// <param name="movement"></param>
+    /// <param name="intent"></param>
     public static void Apply(ref InputComponent input, ref MovementComponent movement, in AiIntent intent) {
         Reset(ref input, movement.Steering);
 
@@ -34,6 +48,12 @@ public static class AiMotionController {
         movement.Velocity.Z = 0f;
     }
 
+    /// <summary>
+    ///     Applies the move intent to the entity.
+    /// </summary>
+    /// <param name="input"></param>
+    /// <param name="steering"></param>
+    /// <param name="intent"></param>
     private static void ApplyMove(ref InputComponent input, SteeringDefinition steering, in AiIntent intent) {
         var direction = intent.MoveDirection;
         if (direction.LengthSquared() > 1f) {
@@ -70,6 +90,11 @@ public static class AiMotionController {
         steering.DashTimer = MathF.Max(0f, intent.DashDuration);
     }
 
+    /// <summary>
+    ///     Resets the entity's intents.'
+    /// </summary>
+    /// <param name="input"></param>
+    /// <param name="steering"></param>
     private static void Reset(ref InputComponent input, SteeringDefinition steering) {
         input.Direction = Vector2.Zero;
 

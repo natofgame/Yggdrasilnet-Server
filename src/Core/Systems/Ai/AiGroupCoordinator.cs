@@ -1,8 +1,12 @@
+using System.Runtime.CompilerServices;
 using Yggdrasilnet.Server.Core.World.Dimensions;
 using Yggdrasilnet.Server.Core.World.Entities.Components;
 
 namespace Yggdrasilnet.Server.Core.Systems.Ai;
 
+/// <summary>
+///     Responsible for coordinating the AI group of a target entity.
+/// </summary>
 public sealed class AiGroupCoordinator {
     private readonly Dictionary<int, float> _gapTimers = new();
 
@@ -38,6 +42,11 @@ public sealed class AiGroupCoordinator {
     public float RepositionBurstMaxDuration { get; set; } = 0.95f;
     public float RepositionSlotShiftInSteps { get; set; } = 0.85f;
 
+    /// <summary>
+    ///     Updates the AI group coordinator.
+    /// </summary>
+    /// <param name="world"></param>
+    /// <param name="dt"></param>
     public void Update(Dimension world, float dt) {
         foreach (var list in _groups.Values)
             list.Clear();
@@ -89,13 +98,18 @@ public sealed class AiGroupCoordinator {
             PersistGroup(world, members);
         }
 
-        for (var i = 0; i < _staleTargetIds.Count; i++) {
-            var targetId = _staleTargetIds[i];
+        foreach (var targetId in _staleTargetIds) {
             _groups.Remove(targetId);
             _gapTimers.Remove(targetId);
         }
     }
 
+    /// <summary>
+    ///     Updates the AI group of a target entity.
+    /// </summary>
+    /// <param name="members"></param>
+    /// <param name="targetId"></param>
+    /// <param name="dt"></param>
     private void UpdateGroup(List<Member> members, int targetId, float dt) {
         _gapTimers.TryGetValue(targetId, out var tokenGap);
         tokenGap = MathF.Max(0f, tokenGap - dt);
@@ -149,6 +163,11 @@ public sealed class AiGroupCoordinator {
         _gapTimers[targetId] = tokenGap;
     }
 
+    /// <summary>
+    ///     Find nearest member that can be attacked.
+    /// </summary>
+    /// <param name="members"></param>
+    /// <returns></returns>
     private static int FindBestCandidate(List<Member> members) {
         var bestScore = float.MinValue;
         var bestIndex = -1;
@@ -164,15 +183,23 @@ public sealed class AiGroupCoordinator {
                         + ai.Impulsivity * 0.1f
                         - ai.TargetDistance * 0.1f
                         + (1f - ai.HealthRatio) * 0.1f;
-            if (score > bestScore) {
-                bestScore = score;
-                bestIndex = i;
+            if (!(score > bestScore)) {
+                continue;
             }
+
+            bestScore = score;
+            bestIndex = i;
         }
 
         return bestIndex;
     }
 
+    /// <summary>
+    ///     Assigns slots to the members of the group.
+    /// </summary>
+    /// <param name="targetId"></param>
+    /// <param name="members"></param>
+    /// <param name="dt"></param>
     private void AssignSlots(int targetId, List<Member> members, float dt) {
         _orderedMembers.Clear();
         _orderedMembers.AddRange(members);
@@ -268,6 +295,11 @@ public sealed class AiGroupCoordinator {
         }
     }
 
+    /// <summary>
+    ///     Shuffles the order of the slots in the group.
+    /// </summary>
+    /// <param name="ordered"></param>
+    /// <param name="dt"></param>
     private void ShuffleSlots(List<Member> ordered, float dt) {
         var count = ordered.Count;
         if (count < 2) {
@@ -319,12 +351,23 @@ public sealed class AiGroupCoordinator {
         }
     }
 
+    /// <summary>
+    ///     Reassigns the token to the AI.
+    /// </summary>
+    /// <param name="ai"></param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void ReleaseToken(ref BrainComponent ai) {
         ai.HasAttackToken = false;
         ai.TokenTimer = 0f;
         ai.TokenWait = 0f;
     }
 
+    /// <summary>
+    ///     Wraps an angle to the range [0, 2pi]
+    /// </summary>
+    /// <param name="angle"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static float WrapAngle(float angle) {
         angle %= MathF.Tau;
         if (angle < 0f) {
@@ -334,6 +377,13 @@ public sealed class AiGroupCoordinator {
         return angle;
     }
 
+    /// <summary>
+    ///     Hash function
+    /// </summary>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
+    /// <param name="salt"></param>
+    /// <returns></returns>
     private static float Hash01(uint a, uint b, uint salt) {
         var x = a;
         x ^= b * 0x9E3779B9u;
@@ -346,6 +396,11 @@ public sealed class AiGroupCoordinator {
         return x / (float)uint.MaxValue;
     }
 
+    /// <summary>
+    ///     Persists the AI group to the dimension.
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="members"></param>
     private static void PersistGroup(Dimension dimension, List<Member> members) {
         foreach (var member in members) {
             if (!dimension.TryGetEntity(member.EntityId, out var entity)) {
@@ -356,5 +411,10 @@ public sealed class AiGroupCoordinator {
         }
     }
 
+    /// <summary>
+    ///     Member of an AI group.
+    /// </summary>
+    /// <param name="EntityId"></param>
+    /// <param name="Ai"></param>
     private record struct Member(int EntityId, BrainComponent Ai);
 }

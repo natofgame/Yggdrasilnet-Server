@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Yggdrasilnet.NetworkV4.Enums;
 using Yggdrasilnet.Server.Core.Events.Events;
 using Yggdrasilnet.Server.Core.Systems.Ai.Behaviors;
@@ -11,6 +12,9 @@ using Yggdrasilnet.Server.Core.World.Entities.Components.Movement;
 
 namespace Yggdrasilnet.Server.Core.Systems.Ai;
 
+/// <summary>
+///     Handles the AI brain.
+/// </summary>
 public static class AiBrain {
     private const float MinDirectionSq = 0.0001f;
     private const float TransitionScoreMargin = 0.12f;
@@ -24,6 +28,16 @@ public static class AiBrain {
         new WanderBehavior()
     ];
 
+    /// <summary>
+    ///     Updates the AI's state.'
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="entity"></param>
+    /// <param name="ai"></param>
+    /// <param name="hp"></param>
+    /// <param name="input"></param>
+    /// <param name="movement"></param>
+    /// <param name="dt"></param>
     public static void Tick(
         Dimension dimension,
         Entity entity,
@@ -81,14 +95,20 @@ public static class AiBrain {
         AiMotionController.Apply(ref input, ref movement, intent);
     }
 
+    /// <summary>
+    ///     Selects the best behavior from the given actions.
+    /// </summary>
+    /// <param name="actions"></param>
+    /// <param name="context"></param>
+    /// <param name="ai"></param>
+    /// <returns></returns>
     private static AiBehavior? SelectBehavior(AiBehavior[] actions, in AiContext context, ref BrainComponent ai) {
         AiBehavior? bestOverall = null;
         var bestOverallScore = 0f;
         AiBehavior? currentStateBest = null;
         var currentStateScore = 0f;
 
-        for (var i = 0; i < actions.Length; i++) {
-            var behavior = actions[i];
+        foreach (var behavior in actions) {
             var score = behavior.Evaluate(context, ai);
             if (score <= 0f) {
                 continue;
@@ -99,10 +119,12 @@ public static class AiBrain {
                 bestOverallScore = score;
             }
 
-            if (behavior.State == ai.CombatState && score > currentStateScore) {
-                currentStateBest = behavior;
-                currentStateScore = score;
+            if (behavior.State != ai.CombatState || !(score > currentStateScore)) {
+                continue;
             }
+
+            currentStateBest = behavior;
+            currentStateScore = score;
         }
 
         if (bestOverall is null) {
@@ -129,14 +151,14 @@ public static class AiBrain {
         return selected;
     }
 
+    /// <summary>
+    ///     Builds the context for the AI.
+    /// </summary>
+    /// <param name="ai"></param>
+    /// <returns></returns>
     private static AiContext BuildContext(in BrainComponent ai) {
         var targetDir = new Vector2(ai.TargetDirection.X, ai.TargetDirection.Z);
-        if (targetDir.LengthSquared() > MinDirectionSq) {
-            targetDir = Vector2.Normalize(targetDir);
-        }
-        else {
-            targetDir = Vector2.Zero;
-        }
+        targetDir = targetDir.LengthSquared() > MinDirectionSq ? Vector2.Normalize(targetDir) : Vector2.Zero;
 
         return new AiContext {
             HasTarget = ai.HasTarget,
@@ -155,6 +177,14 @@ public static class AiBrain {
         };
     }
 
+    /// <summary>
+    ///     Refreshes the AI's target.'
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="self"></param>
+    /// <param name="ai"></param>
+    /// <param name="dt"></param>
+    /// <returns></returns>
     private static bool RefreshTarget(Dimension dimension, Entity self, ref BrainComponent ai, float dt) {
         if (TryKeepCurrentTarget(dimension, self, ref ai)) {
             if (ai.PerceptionTimer > 0f) {
@@ -181,6 +211,13 @@ public static class AiBrain {
         return false;
     }
 
+    /// <summary>
+    ///     Applies the current target to the AI.
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="self"></param>
+    /// <param name="ai"></param>
+    /// <returns></returns>
     private static bool TryKeepCurrentTarget(Dimension dimension, Entity self, ref BrainComponent ai) {
         if (ai.TargetEntityId is not { } targetId || !dimension.TryGetEntity(targetId, out var target)) {
             return false;
@@ -199,6 +236,14 @@ public static class AiBrain {
         return ai.TargetDistance <= ai.SightRange;
     }
 
+    /// <summary>
+    ///     Tries to find the nearest player.
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="self"></param>
+    /// <param name="range"></param>
+    /// <param name="nearest"></param>
+    /// <returns></returns>
     private static bool TryFindNearestPlayer(Dimension dimension, Entity self, float range, out Entity nearest) {
         nearest = null!;
         var bestDistSq = range * range;
@@ -227,6 +272,14 @@ public static class AiBrain {
         return found;
     }
 
+    /// <summary>
+    ///     Applies the target to the AI.
+    /// </summary>
+    /// <param name="dimension"></param>
+    /// <param name="self"></param>
+    /// <param name="ai"></param>
+    /// <param name="target"></param>
+    /// <param name="targetPosition"></param>
     private static void ApplyTarget(
         Dimension dimension,
         Entity self,
@@ -254,6 +307,10 @@ public static class AiBrain {
             : Vector3.Zero;
     }
 
+    /// <summary>
+    ///     Clears the AI's target.'
+    /// </summary>
+    /// <param name="ai"></param>
     private static void ClearTarget(ref BrainComponent ai) {
         ai.TargetEntityId = null;
         ai.TargetDistance = 0f;
@@ -270,6 +327,12 @@ public static class AiBrain {
         ai.CombatStateLockTimer = 0f;
     }
 
+    /// <summary>
+    ///     Clamps a value to [0, 1].
+    /// </summary>
+    /// <param name="v"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static float Clamp01(float v) {
         return Math.Clamp(v, 0f, 1f);
     }

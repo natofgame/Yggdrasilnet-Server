@@ -1,4 +1,3 @@
-using System.Numerics;
 using Yggdrasilnet.Server.Core.Behavior.Core;
 using Yggdrasilnet.Server.Core.World.Dimensions;
 
@@ -30,7 +29,7 @@ public sealed class SpellEffectEntry {
 public sealed class SpellEffectsBehavior : IBehavior {
     public List<SpellEffectEntry> Effects { get; set; } = [];
 
-    void IBehavior.Apply(Dimension dimension, int entityId, Vector3 spawnPosition) { }
+    void IBehavior.Apply(Dimension dimension, int entityId) { }
 
     public void Validate() {
         foreach (var effect in Effects)

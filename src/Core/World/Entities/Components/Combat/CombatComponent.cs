@@ -13,8 +13,7 @@ public struct CombatSlot {
     public int Stacks;
     public float StackRemaining;
 
-    public CombatSlot() {
-    }
+    public CombatSlot() { }
 }
 
 public class CombatComponent : IComponent {

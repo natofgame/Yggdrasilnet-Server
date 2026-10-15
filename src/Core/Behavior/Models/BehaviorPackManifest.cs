@@ -1,5 +1,8 @@
 namespace Yggdrasilnet.Server.Core.Behavior.Models;
 
 public sealed class BehaviorPackManifest {
-    public string Id { get; set; } = string.Empty;
+    /// <summary>
+    ///     The unique identifier of the behavior pack.
+    /// </summary>
+    public string Id { get; init; } = string.Empty;
 }

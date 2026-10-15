@@ -5,12 +5,20 @@ using Yggdrasilnet.Server.Core.World.Entities.Components.Movement;
 
 namespace Yggdrasilnet.Server.Core.Systems.Ai;
 
-public sealed class AiSystem : IWorldSystem {
+/// <summary>
+///     Handles AI.
+/// </summary>
+public sealed class AiSystem : ISystem {
+    public const string Identifier = "ai";
     private readonly AiGroupCoordinator _groups = new();
 
-    public string Id => "ai";
-    public WorldSystemPhase Phase => WorldSystemPhase.Ai;
+    /// <inheritdoc />
+    public string Id => Identifier;
 
+    /// <inheritdoc />
+    public SystemPhase Phase => SystemPhase.Ai;
+
+    /// <inheritdoc />
     public void Update(Dimension dimension, float dt) {
         if (!float.IsFinite(dt) || dt < 0f) {
             return;

@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Yggdrasilnet.Maths.Collision;
 using Yggdrasilnet.Server.Core.World.Dimensions;
 using Yggdrasilnet.Server.Core.World.Entities;
@@ -7,7 +8,12 @@ using Yggdrasilnet.Server.Core.World.Entities.Components.Movement;
 
 namespace Yggdrasilnet.Server.Core.Systems.Physics.Collision;
 
-public sealed class CollisionSystem : IWorldSystem {
+/// <summary>
+///     The collision system.
+/// </summary>
+public sealed class CollisionSystem : ISystem {
+    public const string Identifier = "collision";
+
     private const int SolverIterations = 3;
     private const float ContactSkin = 0.005f;
     private const float MinDisplacementSq = 1e-10f;
@@ -17,9 +23,13 @@ public sealed class CollisionSystem : IWorldSystem {
     private readonly CollisionSpatialHash _hash = new();
     private readonly List<BoundingBoxes> _swept = [];
 
-    public string Id => "collision";
-    public WorldSystemPhase Phase => WorldSystemPhase.Physics;
+    /// <inheritdoc />
+    public string Id => Identifier;
 
+    /// <inheritdoc />
+    public SystemPhase Phase => SystemPhase.Physics;
+
+    /// <inheritdoc />
     public void Update(Dimension dimension, float dt) {
         _colliders.Clear();
         _swept.Clear();
@@ -71,6 +81,12 @@ public sealed class CollisionSystem : IWorldSystem {
         }
     }
 
+    /// <summary>
+    ///     Attempts to resolve a collision between two colliders.
+    /// </summary>
+    /// <param name="i"></param>
+    /// <param name="j"></param>
+    /// <returns></returns>
     private bool TryResolvePair(int i, int j) {
         var entityA = _colliders[i].Entity;
         var entityB = _colliders[j].Entity;
@@ -115,15 +131,29 @@ public sealed class CollisionSystem : IWorldSystem {
             changed = true;
         }
 
-        if (_dynamic[j] && destB != entityB.Position) {
-            entityB.Position = destB;
-            _swept[j] = colliderB.GetSweptWorldAabb(entityB.PreviousPosition, destB);
-            changed = true;
+        if (!_dynamic[j] || destB == entityB.Position) {
+            return changed;
         }
+
+        entityB.Position = destB;
+        _swept[j] = colliderB.GetSweptWorldAabb(entityB.PreviousPosition, destB);
+        changed = true;
 
         return changed;
     }
 
+    /// <summary>
+    ///     Slides the remaining displacement of the colliders.
+    /// </summary>
+    /// <param name="destA"></param>
+    /// <param name="destB"></param>
+    /// <param name="dispA"></param>
+    /// <param name="dispB"></param>
+    /// <param name="time"></param>
+    /// <param name="normal"></param>
+    /// <param name="dynamicA"></param>
+    /// <param name="dynamicB"></param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void SlideRemaining(
         ref Vector3 destA,
         ref Vector3 destB,
@@ -148,120 +178,40 @@ public sealed class CollisionSystem : IWorldSystem {
         }
     }
 
+    /// <summary>
+    ///     Rejects the displacement inward if it would put the collider into a wall.
+    /// </summary>
+    /// <param name="remaining"></param>
+    /// <param name="normal"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static Vector3 RejectInward(Vector3 remaining, Vector3 normal) {
         var intoWall = Vector3.Dot(remaining, normal);
         return intoWall < 0f ? remaining - normal * intoWall : remaining;
     }
 
+    /// <summary>
+    ///     Separates the colliders.
+    /// </summary>
+    /// <param name="positionA"></param>
+    /// <param name="positionB"></param>
+    /// <param name="mtv"></param>
+    /// <param name="dynamicA"></param>
+    /// <param name="dynamicB"></param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void Separate(ref Vector3 positionA, ref Vector3 positionB, Vector3 mtv, bool dynamicA,
         bool dynamicB) {
-        if (dynamicA && dynamicB) {
-            positionA += mtv * 0.5f;
-            positionB -= mtv * 0.5f;
-            return;
+        switch (dynamicA) {
+            case true when dynamicB:
+                positionA += mtv * 0.5f;
+                positionB -= mtv * 0.5f;
+                return;
+            case true:
+                positionA += mtv;
+                return;
+            default:
+                positionB -= mtv;
+                break;
         }
-
-        if (dynamicA) {
-            positionA += mtv;
-            return;
-        }
-
-        positionB -= mtv;
-    }
-}
-
-internal sealed class CollisionSpatialHash {
-    private const float DefaultCellSize = 2f;
-    private readonly Stack<List<int>> _bucketPool = new();
-    private readonly Dictionary<long, List<int>> _cells = new();
-    private readonly List<int> _queryBuffer = [];
-    private int _stamp;
-    private int[] _stamps = [];
-
-    public float CellSize { get; private set; } = DefaultCellSize;
-
-    public void Rebuild(IReadOnlyList<BoundingBoxes> boxes, float cellSize) {
-        Recycle();
-        CellSize = cellSize > 0.1f ? cellSize : DefaultCellSize;
-        EnsureStamps(boxes.Count);
-
-        for (var i = 0; i < boxes.Count; i++)
-            Insert(i, boxes[i]);
-    }
-
-    public List<int> Query(in BoundingBoxes box) {
-        _queryBuffer.Clear();
-        _stamp++;
-        if (_stamp == int.MaxValue) {
-            Array.Clear(_stamps);
-            _stamp = 1;
-        }
-
-        var minX = Floor(box.Min.X);
-        var maxX = Floor(box.Max.X);
-        var minZ = Floor(box.Min.Z);
-        var maxZ = Floor(box.Max.Z);
-
-        for (var z = minZ; z <= maxZ; z++)
-        for (var x = minX; x <= maxX; x++) {
-            if (!_cells.TryGetValue(Pack(x, z), out var bucket)) {
-                continue;
-            }
-
-            for (var i = 0; i < bucket.Count; i++) {
-                var index = bucket[i];
-                if (_stamps[index] == _stamp) {
-                    continue;
-                }
-
-                _stamps[index] = _stamp;
-                _queryBuffer.Add(index);
-            }
-        }
-
-        return _queryBuffer;
-    }
-
-    private void Insert(int index, in BoundingBoxes box) {
-        var minX = Floor(box.Min.X);
-        var maxX = Floor(box.Max.X);
-        var minZ = Floor(box.Min.Z);
-        var maxZ = Floor(box.Max.Z);
-
-        for (var z = minZ; z <= maxZ; z++)
-        for (var x = minX; x <= maxX; x++) {
-            var key = Pack(x, z);
-            if (!_cells.TryGetValue(key, out var bucket)) {
-                bucket = _bucketPool.TryPop(out var recycled) ? recycled : [];
-                _cells[key] = bucket;
-            }
-
-            bucket.Add(index);
-        }
-    }
-
-    private void Recycle() {
-        foreach (var bucket in _cells.Values) {
-            bucket.Clear();
-            _bucketPool.Push(bucket);
-        }
-
-        _cells.Clear();
-    }
-
-    private void EnsureStamps(int count) {
-        if (_stamps.Length >= count) {
-            return;
-        }
-
-        Array.Resize(ref _stamps, Math.Max(count, _stamps.Length * 2 + 8));
-    }
-
-    private int Floor(float value) {
-        return (int)MathF.Floor(value / CellSize);
-    }
-
-    private static long Pack(int x, int z) {
-        return ((long)x << 32) | (uint)z;
     }
 }

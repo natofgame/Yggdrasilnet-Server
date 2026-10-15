@@ -3,33 +3,57 @@ using Yggdrasilnet.Server.Core.Behavior.Models;
 
 namespace Yggdrasilnet.Server.Core.Behavior.Registry;
 
-public sealed class BehaviorPackRegistry {
-    internal static readonly JsonSerializerOptions JsonOptions = new() {
+/// <summary>
+///     Registry for behavior packs.
+/// </summary>
+/// <param name="entityComponents"></param>
+public sealed class BehaviorPackRegistry(EntityComponentRegistry entityComponents) {
+    private static readonly JsonSerializerOptions JsonOptions = new() {
         PropertyNameCaseInsensitive = true
     };
 
     private static readonly EntityComponentRegistry DefaultEntityComponents = EntityComponentRegistry.CreateDefault();
-    private readonly EntityComponentRegistry _entityComponents;
+
+    private readonly EntityComponentRegistry _entityComponents =
+        entityComponents ?? throw new ArgumentNullException(nameof(entityComponents));
+
     private readonly Dictionary<string, BehaviorDefinition> _entityDefinitions = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, BehaviorDefinition> _spellDefinitions = new(StringComparer.OrdinalIgnoreCase);
 
     public BehaviorPackRegistry()
         : this(DefaultEntityComponents) { }
 
-    public BehaviorPackRegistry(EntityComponentRegistry entityComponents) {
-        _entityComponents = entityComponents ?? throw new ArgumentNullException(nameof(entityComponents));
-    }
-
+    /// <summary>
+    ///     The number of behavior packs loaded.
+    /// </summary>
     public int PackCount { get; private set; }
 
+    /// <summary>
+    ///     The number of behaviors loaded.
+    /// </summary>
     public int EntityBehaviorCount => _entityDefinitions.Count;
 
+    /// <summary>
+    ///     The number of spell behaviors loaded.
+    /// </summary>
     public int SpellBehaviorCount => _spellDefinitions.Count;
 
+    /// <summary>
+    ///     Tries to get a behavior definition by its ID.
+    /// </summary>
+    /// <param name="definitionId"></param>
+    /// <param name="definition"></param>
+    /// <returns></returns>
     public bool TryGetEntity(string definitionId, out BehaviorDefinition definition) {
         return _entityDefinitions.TryGetValue(definitionId, out definition!);
     }
 
+    /// <summary>
+    ///     Tries to get a spell behavior definition by its ID.
+    /// </summary>
+    /// <param name="spellId"></param>
+    /// <param name="definition"></param>
+    /// <returns></returns>
     public bool TryGetSpell(string spellId, out BehaviorDefinition definition) {
         return _spellDefinitions.TryGetValue(spellId, out definition!);
     }
@@ -41,6 +65,11 @@ public sealed class BehaviorPackRegistry {
         return registry;
     }
 
+    /// <summary>
+    ///     Loads behavior packs from the specified directory.
+    /// </summary>
+    /// <param name="rootPath"></param>
+    /// <exception cref="InvalidDataException"></exception>
     public void Load(string rootPath) {
         PackCount = 0;
 
@@ -71,6 +100,13 @@ public sealed class BehaviorPackRegistry {
         }
     }
 
+    /// <summary>
+    ///     Loads behaviors from the specified directory.
+    /// </summary>
+    /// <param name="packPath"></param>
+    /// <param name="name"></param>
+    /// <param name="definitions"></param>
+    /// <exception cref="InvalidDataException"></exception>
     private void LoadBehavior(string packPath, string name, Dictionary<string, BehaviorDefinition> definitions) {
         var folder = Path.Combine(packPath, name);
         if (!Directory.Exists(folder)) {

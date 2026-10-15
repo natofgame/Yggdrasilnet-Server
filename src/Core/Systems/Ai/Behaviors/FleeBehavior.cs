@@ -5,14 +5,21 @@ using Yggdrasilnet.Server.Core.World.Entities.Components;
 
 namespace Yggdrasilnet.Server.Core.Systems.Ai.Behaviors;
 
+/// <summary>
+///     Flees from the target.
+/// </summary>
 public sealed class FleeBehavior : AiBehavior {
     public float Speed { get; set; } = 3.5f;
     public float DashMultiplier { get; set; } = 1.8f;
     public float DashDuration { get; set; } = 0.3f;
 
+    /// <inheritdoc />
     public override AiCombatState State => AiCombatState.Retreat;
+
+    /// <inheritdoc />
     public override float TransitionLockDuration => 0.9f;
 
+    /// <inheritdoc />
     public override float Evaluate(in AiContext context, in BrainComponent ai) {
         if (!context.HasTarget) {
             return 0f;
@@ -30,6 +37,7 @@ public sealed class FleeBehavior : AiBehavior {
         return Math.Clamp(fear, 0f, 1f);
     }
 
+    /// <inheritdoc />
     public override AiIntent BuildIntent(
         Dimension world,
         Entity entity,
@@ -47,7 +55,6 @@ public sealed class FleeBehavior : AiBehavior {
         return AiIntent.Move(
             away,
             Speed,
-            0f,
             hasDash: true,
             dashDirection: away,
             dashSpeed: Speed * DashMultiplier,

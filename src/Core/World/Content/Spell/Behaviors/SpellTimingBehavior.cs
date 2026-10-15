@@ -1,4 +1,3 @@
-using System.Numerics;
 using Yggdrasilnet.Server.Core.Behavior.Core;
 using Yggdrasilnet.Server.Core.World.Dimensions;
 
@@ -10,7 +9,7 @@ public sealed class SpellTimingBehavior : IBehavior {
     public float Impact { get; set; }
     public float Return { get; set; }
 
-    void IBehavior.Apply(Dimension dimension, int entityId, Vector3 spawnPosition) { }
+    void IBehavior.Apply(Dimension dimension, int entityId) { }
 
     public void Validate() {
         BehaviorValidation.EnsureNonNegative(
