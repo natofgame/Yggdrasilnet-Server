@@ -25,7 +25,7 @@ public static class Program {
             app.Run();
         }
         catch (Exception exception) {
-            Log.Fatal(exception, "Application terminated unexpectedly");
+            Log.Fatal(exception, "[Server] Application terminated unexpectedly");
             throw;
         }
         finally {

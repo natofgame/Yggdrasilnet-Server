@@ -24,7 +24,7 @@ public class PluginManager(Bootstrap.Server server) {
         var dir = Path.GetFullPath(PluginsDirector);
         if (!Directory.Exists(dir)) {
             Directory.CreateDirectory(dir);
-            Log.Information("[Plugin] No plugin directory found, created:" + dir);
+            Log.Information("[Plugin] No plugin directory found, created: {Directory}", dir);
             return;
         }
  
@@ -67,7 +67,7 @@ public class PluginManager(Bootstrap.Server server) {
             }
         }
         catch (Exception ex) {
-            Log.Error(ex, "Échec du chargement de {File}", Path.GetFileName(fullPath));
+            Log.Error(ex, "[Plugin] Failed to load {File}", Path.GetFileName(fullPath));
             context?.Unload();
         }
     }
@@ -86,7 +86,7 @@ public class PluginManager(Bootstrap.Server server) {
             }
  
             if (_plugins.Any(p => p.Instance.Id == instance.Id)) {
-                Log.Error("[Plugin] Plugin already loaded : {Id}", instance.Id);
+                Log.Error("[Plugin] Plugin already loaded: {Id}", instance.Id);
                 return false;
             }
  
@@ -94,12 +94,12 @@ public class PluginManager(Bootstrap.Server server) {
             instance.OnLoad(server);
             _plugins.Add(new Plugin(instance, context, path));
  
-            Log.Information("Plugin loaded : {Name} v{Version} by {Author}",
+            Log.Information("[Plugin] Plugin loaded: {Name} v{Version} by {Author}",
                 meta?.Name ?? instance.Id, meta?.Version ?? "?", meta?.Author ?? "Unknown");
             return true;
         }
         catch (Exception ex) {
-            Log.Error(ex, "[Plugin] Error loading plugin : {Type}", type.FullName ?? "Unknown");
+            Log.Error(ex, "[Plugin] Error loading plugin: {Type}", type.FullName ?? "Unknown");
             return false;
         }
     }
@@ -116,10 +116,10 @@ public class PluginManager(Bootstrap.Server server) {
         try {
             plugin.Instance.OnEnable(server);
             plugin.Enabled = true;
-            Log.Information("[Plugin] Plugin enabled : {Name}", plugin.Instance.Id);
+            Log.Information("[Plugin] Plugin enabled: {Name}", plugin.Instance.Id);
         }
         catch (Exception ex) {
-            Log.Error(ex, "[Plugin] Error activating plugin : {Name}", plugin.Instance.Id);
+            Log.Error(ex, "[Plugin] Error activating plugin: {Name}", plugin.Instance.Id);
         }
     }
 
@@ -160,7 +160,7 @@ public class PluginManager(Bootstrap.Server server) {
             plugin.Instance.OnDisable(server);
         }
         catch (Exception ex) {
-            Log.Error(ex, "[Plugin] Error disabling plugin : {Name}", plugin.Instance.Id);
+            Log.Error(ex, "[Plugin] Error disabling plugin: {Name}", plugin.Instance.Id);
         }
         finally {
             plugin.Enabled = false;

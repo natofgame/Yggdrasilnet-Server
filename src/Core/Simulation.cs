@@ -206,7 +206,7 @@ public sealed class Simulation {
         var behaviorRoot = Path.Combine(AppContext.BaseDirectory, "BehaviorPack");
         behaviorRegistry.Load(behaviorRoot);
         Log.Information(
-            "Behavior packs loaded: {PackCount} ({EntityBehaviorCount} entity, {SpellBehaviorCount} spells)",
+            "[Behavior] Behavior packs loaded:{PackCount} ({EntityBehaviorCount} entity, {SpellBehaviorCount} spells)",
             behaviorRegistry.PackCount,
             behaviorRegistry.EntityBehaviorCount,
             behaviorRegistry.SpellBehaviorCount);
