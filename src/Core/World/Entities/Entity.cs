@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using Yggdrasilnet.Server.Core.Components;
 using Yggdrasilnet.Server.Core.World.Dimensions;
+using Yggdrasilnet.Server.Core.World.Entities.Components.Movement;
 
 namespace Yggdrasilnet.Server.Core.World.Entities;
 
@@ -33,7 +34,7 @@ public class Entity : IEntity {
 
     public Vector3 PreviousPosition { get; set; }
 
-    public IDimension Dimension { get; internal set; } = null!;
+    public IDimension Dimension { get; } = null!;
 
     public IWorld World => Dimension.World;
 
@@ -70,6 +71,16 @@ public class Entity : IEntity {
         }
 
         return removed;
+    }
+
+    /// <inheritdoc />
+    public void Teleport(Vector3 position) {
+        Position = position;
+        PreviousPosition = position;
+
+        if (TryGet<MovementComponent>(out var movement)) {
+            movement.Velocity = Vector3.Zero;
+        }
     }
 
     private ComponentManager GetComponentManager() {

@@ -53,15 +53,39 @@ public sealed class GameHandler(
 
     /// <inheritdoc />
     public override void Handle(CommandPacket packet) {
+        Log.Information("[{EndPoint}] issued command: {Command}", session.Peer.Address, packet.Command);
+        simulation.CommandFactory.Execute(packet.Command, CreateCommandSource());
+    }
+
+    /// <inheritdoc />
+    public override void Handle(ChatPacket packet) {
+        simulation.Chat.Broadcast(session, packet.Message);
+    }
+
+    /// <inheritdoc />
+    public override void Handle(CommandSuggestionRequestPacket packet) {
+        var text = packet.Text;
+        var offset = text.StartsWith('/') ? 1 : 0;
+        var suggestions = simulation.CommandFactory.Suggest(text[offset..], CreateCommandSource());
+
+        var response = new CommandSuggestionResponsePacket {
+            RequestId = packet.RequestId,
+            Start = suggestions.Start + offset,
+            Usage = suggestions.Usage
+        };
+        response.Suggestions.AddRange(suggestions.Suggestions);
+
+        simulation.Network.Send(session, response);
+    }
+
+    private CommandSource CreateCommandSource() {
         session.TryGetEntityBinding(out var entityId, out var dimensionName);
 
-        var source = new CommandSource {
+        return new CommandSource {
             ExecutorEntityId = entityId,
             Dimension = simulation.World.GetDimension(dimensionName),
             PermissionLevel = 0,
-            SendFeedback = msg => Log.Information("[{EndPoint}] {Message}", session.Peer.Address, msg)
+            SendFeedback = msg => simulation.Chat.SendSystemMessage(session, msg)
         };
-
-        simulation.CommandFactory.Execute(packet.Command, source);
     }
 }
