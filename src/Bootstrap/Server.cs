@@ -83,15 +83,17 @@ public sealed class Server(int port, int tickRate, SnapshotConfiguration snapsho
 
         _stopped = true;
         _runCts?.Cancel();
-        
+
+        // Wait for the game loop to finish its current tick: the world must not be touched by two threads,
+        // so plugins are disabled only once the loop has stopped.
+        if (_gameLoopThread is not null && _gameLoopThread.IsAlive) {
+            _gameLoopThread.Join(TimeSpan.FromSeconds(10));
+        }
+
         Plugins.DisableAll();
 
         if (_consoleThread is not null && _consoleThread.IsAlive) {
             _consoleThread.Join(TimeSpan.FromSeconds(2));
-        }
-
-        if (_gameLoopThread is not null && _gameLoopThread.IsAlive) {
-            _gameLoopThread.Join(TimeSpan.FromSeconds(10));
         }
 
         _server?.Stop();
