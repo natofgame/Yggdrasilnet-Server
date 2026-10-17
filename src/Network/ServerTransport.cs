@@ -12,13 +12,17 @@ namespace Yggdrasilnet.Server.Network;
 /// <summary>
 ///     Transport for the server.
 /// </summary>
-public sealed class ServerTransport() : INetEventListener {
-    private readonly ConcurrentQueue<IServerEvent> _events = null!;
-    private readonly NetManager _netManager = null!;
+/// <remarks>
+///     LiteNetLib callbacks run on the thread that calls <see cref="Poll" /> (the game loop thread).
+///     They only enqueue events, which the simulation drains on that same thread.
+/// </remarks>
+public sealed class ServerTransport : INetEventListener {
+    private readonly ConcurrentQueue<IServerEvent> _events;
+    private readonly NetManager _netManager;
     private readonly NetDataWriter _writer = new();
 
-    public ServerTransport(ConcurrentQueue<IServerEvent> events) : this() {
-        _events = events;
+    public ServerTransport(ConcurrentQueue<IServerEvent> events) {
+        _events = events ?? throw new ArgumentNullException(nameof(events));
         _netManager = new NetManager(this) { AutoRecycle = true };
     }
 
