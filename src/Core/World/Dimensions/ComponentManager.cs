@@ -1,53 +1,60 @@
-using System.Collections.Concurrent;
 using Yggdrasilnet.Server.Core.Components;
 
 namespace Yggdrasilnet.Server.Core.World.Dimensions;
 
 /// <summary>
-///     G�re le stockage et l'acc�s aux composants des entit�s dans une dimension.
+///     Stores the components of the entities of a dimension.
 /// </summary>
+/// <remarks>
+///     Not thread-safe: like the rest of the world, it must only be used from the game loop thread.
+/// </remarks>
 public sealed class ComponentManager {
-    private readonly ConcurrentDictionary<Type, IComponentStore> _stores = new();
+    private readonly Dictionary<Type, IComponentStore> _stores = new();
 
     /// <summary>
-    ///     R�cup�re le magasin de composants pour un type sp�cifique.
+    ///     Gets the store for a component type, creating it on first use.
     /// </summary>
-    /// <typeparam name="T">Le type de composant.</typeparam>
-    /// <returns>Le magasin de composants pour le type sp�cifi�.</returns>
+    /// <typeparam name="T">The component type.</typeparam>
+    /// <returns>The store for <typeparamref name="T" />.</returns>
     public ComponentStore<T> GetStore<T>() where T : class, IComponent {
-        return (ComponentStore<T>)_stores.GetOrAdd(typeof(T), _ => new ComponentStore<T>());
+        if (!_stores.TryGetValue(typeof(T), out var store)) {
+            store = new ComponentStore<T>();
+            _stores[typeof(T)] = store;
+        }
+
+        return (ComponentStore<T>)store;
     }
 
     /// <summary>
-    ///     R�cup�re tous les magasins de composants existants.
+    ///     Gets all existing component stores.
     /// </summary>
-    /// <returns>Une collection de tous les magasins de composants.</returns>
+    /// <returns>Every store created so far.</returns>
     public IEnumerable<IComponentStore> GetAllStores() {
         return _stores.Values;
     }
 }
 
 /// <summary>
-///     Interface de base pour un magasin de composants.
+///     Base interface of a component store.
 /// </summary>
 public interface IComponentStore {
     /// <summary>
-    ///     V�rifie si une entit� poss�de un composant dans ce magasin.
+    ///     Checks whether an entity has a component in this store.
     /// </summary>
     bool Has(int entityId);
 
     /// <summary>
-    ///     Supprime le composant associ� � une entit�.
+    ///     Removes the component of an entity.
     /// </summary>
     bool Remove(int entityId);
 }
 
 /// <summary>
-///     Magasin de composants typ� pour une performance accrue.
+///     Typed component store.
 /// </summary>
-/// <typeparam name="T">Le type de composant stock�.</typeparam>
+/// <typeparam name="T">The stored component type.</typeparam>
 public sealed class ComponentStore<T> : IComponentStore where T : class, IComponent {
-    private readonly ConcurrentDictionary<int, T> _components = new();
+    private readonly Dictionary<int, T> _components = new();
 
     /// <inheritdoc />
     public bool Has(int entityId) {
@@ -56,32 +63,32 @@ public sealed class ComponentStore<T> : IComponentStore where T : class, ICompon
 
     /// <inheritdoc />
     public bool Remove(int entityId) {
-        return _components.TryRemove(entityId, out _);
+        return _components.Remove(entityId);
     }
 
     /// <summary>
-    ///     R�cup�re le composant d'une entit�. Lance une exception si non trouv�.
+    ///     Gets the component of an entity. Throws if the entity has none.
     /// </summary>
     public T Get(int entityId) {
         return _components[entityId];
     }
 
     /// <summary>
-    ///     Tente de r�cup�rer le composant d'une entit�.
+    ///     Tries to get the component of an entity.
     /// </summary>
     public bool TryGet(int entityId, out T? component) {
         return _components.TryGetValue(entityId, out component);
     }
 
     /// <summary>
-    ///     D�finit le composant pour une entit�.
+    ///     Sets the component of an entity.
     /// </summary>
     public void Set(int entityId, T component) {
         _components[entityId] = component;
     }
 
     /// <summary>
-    ///     R�cup�re tous les composants de ce type.
+    ///     Gets all components of this type.
     /// </summary>
     public IEnumerable<T> GetAll() {
         return _components.Values;

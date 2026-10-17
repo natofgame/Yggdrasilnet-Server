@@ -23,8 +23,7 @@ public interface IWorld {
     Entity Spawn(string definitionId, string dimensionId, Vector3 position);
     bool Despawn(Entity entity);
     bool Despawn(int entityId);
-    bool TryGetEntity(int entityId, out Entity? entity);
-    bool TryResolveEntity(int entityId, out Entity? entity);
+    bool TryGetEntity(int entityId, [NotNullWhen(true)] out Entity? entity);
     bool TrySetInput(string dimensionName, int entityId, float x, float z);
     bool TryGetEntity(string dimensionName, int entityId, out Entity? entity);
     bool TryDespawn(string dimensionName, int entityId);

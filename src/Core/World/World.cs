@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Yggdrasilnet.Server.Core.Behavior.Registry;
@@ -9,8 +8,14 @@ using Yggdrasilnet.Server.Core.World.Entities;
 
 namespace Yggdrasilnet.Server.Core.World;
 
+/// <summary>
+///     The world: all dimensions of the server.
+/// </summary>
+/// <remarks>
+///     Not thread-safe: only the game loop thread may use it (see <see cref="Dimension" />).
+/// </remarks>
 public sealed class World : IWorld {
-    private readonly ConcurrentDictionary<string, Dimension> _dimensions = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, Dimension> _dimensions = new(StringComparer.OrdinalIgnoreCase);
     private Dimension? _main;
 
     public World(Simulation simulation, BehaviorPackRegistry? behaviors = null) {
@@ -91,16 +96,6 @@ public sealed class World : IWorld {
         return false;
     }
 
-    public bool TryResolveEntity(int entityId, out Entity? entity) {
-        foreach (var dimension in _dimensions.Values)
-            if (dimension.TryGetEntity(entityId, out entity)) {
-                return true;
-            }
-
-        entity = null;
-        return false;
-    }
-
     public bool TrySetInput(string dimensionName, int entityId, float x, float z) {
         return TryGetDimension(dimensionName, out var dimension) && dimension.TrySetInput(entityId, new Vector2(x, z));
     }
@@ -119,19 +114,19 @@ public sealed class World : IWorld {
     }
 
     public IEnumerable<Entity> Query<T>() where T : class, IComponent {
-        return _dimensions.Values.SelectMany(dimension => dimension.Query<T>());
+        return _dimensions.Values.SelectMany(dimension => dimension.Query<T>()).ToList();
     }
 
     public IEnumerable<Entity> Query<T1, T2>()
         where T1 : class, IComponent
         where T2 : class, IComponent {
-        return _dimensions.Values.SelectMany(dimension => dimension.Query<T1, T2>());
+        return _dimensions.Values.SelectMany(dimension => dimension.Query<T1, T2>()).ToList();
     }
 
     public IEnumerable<Entity> Query<T1, T2, T3>() where T1 : class, IComponent
         where T2 : class, IComponent
         where T3 : class, IComponent {
-        return _dimensions.Values.SelectMany(dimension => dimension.Query<T1, T2, T3>());
+        return _dimensions.Values.SelectMany(dimension => dimension.Query<T1, T2, T3>()).ToList();
     }
 
     public void Update(float deltaTime) {

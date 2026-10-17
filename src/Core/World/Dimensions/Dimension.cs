@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Yggdrasilnet.Server.Core.Behavior.Models;
@@ -9,10 +8,17 @@ using Yggdrasilnet.Server.Core.World.Entities.Components;
 
 namespace Yggdrasilnet.Server.Core.World.Dimensions;
 
+/// <summary>
+///     A dimension: a set of entities simulated together by one system pipeline.
+/// </summary>
+/// <remarks>
+///     Not thread-safe: the world belongs to the game loop thread. Network callbacks, console input and
+///     plugins reach it through events drained on that thread, never directly from another thread.
+/// </remarks>
 public class Dimension : IDimension {
-    private readonly ConcurrentDictionary<int, Entity> _entities = new();
+    private readonly Dictionary<int, Entity> _entities = new();
 
-    private readonly ConcurrentDictionary<Type, HashSet<int>> _entityIndex = new();
+    private readonly Dictionary<Type, HashSet<int>> _entityIndex = new();
     private readonly HashSet<long> _loadedChunks = [];
 
     private readonly SystemPipeline _systems;
@@ -44,7 +50,7 @@ public class Dimension : IDimension {
     }
 
     public bool Despawn(int entityId) {
-        if (!_entities.TryRemove(entityId, out var entity)) {
+        if (!_entities.Remove(entityId, out var entity)) {
             return false;
         }
 
@@ -68,48 +74,45 @@ public class Dimension : IDimension {
     }
 
 
+    // Queries return a snapshot so callers can spawn, despawn or change components while iterating.
     public IEnumerable<Entity> Query<T>() where T : class, IComponent {
-        var type = typeof(T);
-
-        if (!_entityIndex.TryGetValue(type, out var entityIds)) {
-            yield break;
+        if (!_entityIndex.TryGetValue(typeof(T), out var entityIds)) {
+            return [];
         }
 
+        var result = new List<Entity>(entityIds.Count);
         foreach (var id in entityIds)
             if (_entities.TryGetValue(id, out var entity)) {
-                yield return entity;
+                result.Add(entity);
             }
+
+        return result;
     }
 
     public IEnumerable<Entity> Query<T1, T2>()
         where T1 : class, IComponent
         where T2 : class, IComponent {
-        var type1 = typeof(T1);
-        var type2 = typeof(T2);
-
-        if (!_entityIndex.TryGetValue(type1, out var ids1) ||
-            !_entityIndex.TryGetValue(type2, out var ids2)) {
-            yield break;
+        if (!_entityIndex.TryGetValue(typeof(T1), out var ids1) ||
+            !_entityIndex.TryGetValue(typeof(T2), out var ids2)) {
+            return [];
         }
 
         var (small, large) = ids1.Count <= ids2.Count ? (ids1, ids2) : (ids2, ids1);
 
+        var result = new List<Entity>(small.Count);
         foreach (var id in small)
             if (large.Contains(id) && _entities.TryGetValue(id, out var entity)) {
-                yield return entity;
+                result.Add(entity);
             }
+
+        return result;
     }
 
     public IEnumerable<Entity> Query<T1, T2, T3>()
         where T1 : class, IComponent
         where T2 : class, IComponent
         where T3 : class, IComponent {
-        var results = Query<T1, T2>().ToList();
-
-        foreach (var entity in results)
-            if (entity.Has<T3>()) {
-                yield return entity;
-            }
+        return Query<T1, T2>().Where(entity => entity.Has<T3>()).ToList();
     }
 
     public bool TrySetInput(int entityId, Vector2 input) {
@@ -171,10 +174,6 @@ public class Dimension : IDimension {
 
     public bool TryGetSpell(string spellId, out BehaviorDefinition definition) {
         return World.Behaviors.TryGetSpell(spellId, out definition);
-    }
-
-    public IEnumerable<Entity> GetEntities() {
-        return _entities.Values;
     }
 
     private static long ToChunkKey(int chunkX, int chunkZ) {

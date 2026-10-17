@@ -35,4 +35,20 @@ public sealed class WorldQueryTests {
 
         Assert.Equal([full.UniqueId, otherDimension.UniqueId], ids.Order());
     }
+
+    [Fact]
+    public void Query_AllowsDespawningAndSpawningWhileIterating() {
+        var world = new World(null!, new BehaviorPackRegistry());
+        var dimension = world.CreateDimension("overworld", isMain: true);
+        for (var i = 0; i < 5; i++) {
+            dimension.Spawn("test", Vector3.Zero).Set(new LivingComponent());
+        }
+
+        foreach (var entity in dimension.Query<LivingComponent>()) {
+            dimension.Despawn(entity);
+            dimension.Spawn("test", Vector3.Zero).Set(new LivingComponent());
+        }
+
+        Assert.Equal(5, dimension.Query<LivingComponent>().Count());
+    }
 }

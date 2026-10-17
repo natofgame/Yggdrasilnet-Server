@@ -83,15 +83,6 @@ public sealed class Simulation {
     public IWorld World { get; }
 
     /// <summary>
-    /// </summary>
-    /// <param name="entityId"></param>
-    /// <param name="entity"></param>
-    /// <returns></returns>
-    private bool GetEntity(int entityId, out Entity? entity) {
-        return World.TryResolveEntity(entityId, out entity);
-    }
-
-    /// <summary>
     ///     Updates the simulation.
     /// </summary>
     /// <param name="dt"></param>
@@ -161,17 +152,7 @@ public sealed class Simulation {
             return;
         }
 
-        // TODO: Handle disconnection gracefully
-        if (session.TryGetEntityBinding(out var entityId, out var dimensionName)) {
-            if (World.TryResolveEntity(entityId, out var entity) && entity is not null) {
-                Server.Event.Publish(new PlayerLeaveEvent(entity.ToPlayer()));
-            }
-
-            World.TryDespawn(dimensionName, entityId);
-            session.ClearEntityBinding();
-        }
-
-        _players.ReleaseName(session);
+        _players.LeaveGame(session);
 
         Log.Information("Peer disconnected: {EndPoint} ({Reason})", peer.Address, info.Reason);
     }

@@ -64,7 +64,7 @@ public sealed class PlayerService(
         session.BindEntity(player.UniqueId, world.MainDimension.Id);
         session.MarkReady();
 
-        if (world.TryResolveEntity(player.UniqueId, out var entity) && entity is not null) {
+        if (world.TryGetEntity(player.UniqueId, out var entity)) {
             entityRegistry.EnsureDefinitionId(entity.Id);
         }
 
@@ -77,6 +77,25 @@ public sealed class PlayerService(
         entityRegistry.SendDefinitions(session);
 
         server.Event.Publish(new PlayerJoinEvent(player));
+    }
+
+    /// <summary>
+    ///     Removes the player of the given session from the game: publishes <see cref="PlayerLeaveEvent" />
+    ///     while the entity still exists, despawns it (clients learn it from the next snapshot) and frees the name.
+    ///     Safe to call for a session that never entered the game.
+    /// </summary>
+    /// <param name="session"></param>
+    public void LeaveGame(GameSession session) {
+        if (session.TryGetEntityBinding(out var entityId, out var dimensionName)) {
+            if (world.TryGetEntity(entityId, out var entity)) {
+                server.Event.Publish(new PlayerLeaveEvent(entity.ToPlayer()));
+            }
+
+            world.TryDespawn(dimensionName, entityId);
+            session.ClearEntityBinding();
+        }
+
+        ReleaseName(session);
     }
 
     /// <summary>
