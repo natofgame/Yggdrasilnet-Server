@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Serilog;
+using Yggdrasilnet.Server.Bootstrap;
 
 namespace Yggdrasilnet.Server.Plugin;
 
@@ -81,16 +82,20 @@ public class PluginManager(Bootstrap.Server server) {
     /// <returns></returns>
     private bool TryLoadType(Type type, PluginContext context, string path) {
         try {
+            var meta = type.GetCustomAttribute<PluginAttribute>();
+            if (!IsCompatible(type, meta)) {
+                return false;
+            }
+
             if (Activator.CreateInstance(type) is not IYggdrasilPlugin instance) {
                 return false;
             }
- 
+
             if (_plugins.Any(p => p.Instance.Id == instance.Id)) {
                 Log.Error("[Plugin] Plugin already loaded: {Id}", instance.Id);
                 return false;
             }
- 
-            var meta = type.GetCustomAttribute<PluginAttribute>();
+
             instance.OnLoad(server);
             _plugins.Add(new Plugin(instance, context, path));
  
@@ -104,6 +109,33 @@ public class PluginManager(Bootstrap.Server server) {
         }
     }
     
+    /// <summary>
+    ///  Checks that the running server satisfies the Yggdrasil version required by the plugin.
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="meta"></param>
+    /// <returns></returns>
+    public static bool IsCompatible(Type type, PluginAttribute? meta) {
+        var name = meta?.Name ?? type.FullName ?? type.Name;
+        if (meta?.YggdrasilVersion is null) {
+            Log.Warning("[Plugin] {Name} does not declare a required Yggdrasil version", name);
+            return true;
+        }
+
+        if (!ServerVersion.TryParse(meta.YggdrasilVersion, out var required)) {
+            Log.Error("[Plugin] {Name} declares an invalid Yggdrasil version: {Version}", name, meta.YggdrasilVersion);
+            return false;
+        }
+
+        if (ServerVersion.Numeric < required) {
+            Log.Error("[Plugin] {Name} requires Yggdrasil {Required} or newer (server is {Current})",
+                name, meta.YggdrasilVersion, ServerVersion.Current);
+            return false;
+        }
+
+        return true;
+    }
+
     /// <summary>
     ///  Enable all plugins.
     /// </summary>

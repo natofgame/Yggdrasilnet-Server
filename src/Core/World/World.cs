@@ -131,7 +131,7 @@ public sealed class World : IWorld {
     public IEnumerable<Entity> Query<T1, T2, T3>() where T1 : class, IComponent
         where T2 : class, IComponent
         where T3 : class, IComponent {
-        throw new NotImplementedException();
+        return _dimensions.Values.SelectMany(dimension => dimension.Query<T1, T2, T3>());
     }
 
     public void Update(float deltaTime) {
