@@ -8,6 +8,8 @@
         <AssemblyName>Yggdrasilnet.Server</AssemblyName>
         <RootNamespace>Yggdrasilnet.Server</RootNamespace>
         <Version>0.0.1-alpha</Version>
+        <!-- Test projects live in tests/ and must not be compiled into the server. -->
+        <DefaultItemExcludes>$(DefaultItemExcludes);tests/**</DefaultItemExcludes>
     </PropertyGroup>
 
     <ItemGroup>

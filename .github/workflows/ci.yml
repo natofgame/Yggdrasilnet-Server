@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+    tags: ["v*"]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  # Sibling repositories referenced by Yggdrasilnet.Server.csproj (../Yggdrasilnet.*).
+  NETWORK_REPO: https://github.com/natofgame/Yggdrasilnet-Network.git
+  MATHS_REPO: https://github.com/natofgame/Yggdrasilnet-Maths.git
+  GAMEPLAY_REPO: https://github.com/natofgame/Yggdrasilnet-Gameplay.git
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout server
+        uses: actions/checkout@v4
+        with:
+          path: Yggdrasilnet.Server
+
+      - name: Checkout dependencies
+        shell: bash
+        run: |
+          # Use the same branch as the server when it exists, otherwise fall back to main.
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then branch=main; else branch="${GITHUB_BASE_REF:-$GITHUB_REF_NAME}"; fi
+          clone() {
+            git clone --depth 1 --branch "$branch" "$1" "$2" 2>/dev/null \
+              || git clone --depth 1 --branch main "$1" "$2"
+            echo "$2 -> $(git -C "$2" rev-parse --abbrev-ref HEAD) @ $(git -C "$2" rev-parse --short HEAD)"
+          }
+          clone "$NETWORK_REPO" Yggdrasilnet.Network
+          clone "$MATHS_REPO" Yggdrasilnet.Maths
+          clone "$GAMEPLAY_REPO" Yggdrasilnet.Gameplay
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore Yggdrasilnet.Server/tests/Yggdrasilnet.Server.Tests/Yggdrasilnet.Server.Tests.csproj
+
+      - name: Build
+        run: dotnet build Yggdrasilnet.Server/tests/Yggdrasilnet.Server.Tests/Yggdrasilnet.Server.Tests.csproj -c Release --no-restore
+
+      - name: Test
+        run: dotnet test Yggdrasilnet.Server/tests/Yggdrasilnet.Server.Tests/Yggdrasilnet.Server.Tests.csproj -c Release --no-build
+
+      - name: Publish
+        if: github.ref_type == 'tag'
+        shell: bash
+        run: |
+          for rid in linux-x64 win-x64; do
+            dotnet publish Yggdrasilnet.Server/Yggdrasilnet.Server.csproj -c Release -r "$rid" \
+              --self-contained false -o "publish/$rid"
+            cp Yggdrasilnet.Server/LICENSE Yggdrasilnet.Server/README.md "publish/$rid/"
+            (cd "publish/$rid" && zip -qr "../../Yggdrasilnet.Server-${GITHUB_REF_NAME}-$rid.zip" .)
+          done
+
+      - name: Upload artifacts
+        if: github.ref_type == 'tag'
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-packages
+          path: Yggdrasilnet.Server-*.zip
+
+  release:
+    name: Release
+    needs: build
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: server-packages
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Yggdrasilnet.Server-*.zip
+          generate_release_notes: true
+          # Tags like v0.0.1-alpha are published as pre-releases.
+          prerelease: ${{ contains(github.ref_name, '-') }}
