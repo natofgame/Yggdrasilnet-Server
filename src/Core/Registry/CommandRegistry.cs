@@ -1,5 +1,6 @@
 using Yggdrasilnet.Server.Core.Command;
 using Yggdrasilnet.Server.Core.Command.Commands;
+using Yggdrasilnet.Server.Core.Command.Suggestion;
 using Yggdrasilnet.Server.Core.World;
 
 namespace Yggdrasilnet.Server.Core.Registry;
@@ -14,6 +15,8 @@ public static class CommandRegistry {
     /// <param name="factory"></param>
     /// <param name="world"></param>
     public static void Registers(CommandFactory factory, IWorld world) {
+        factory.RegisterSuggestionProvider(new EntityTypeSuggestionProvider(world));
+
         factory.Register(new SummonCommand());
     }
 }

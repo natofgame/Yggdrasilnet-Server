@@ -1,4 +1,5 @@
 using System.Numerics;
+using Yggdrasilnet.Server.Core.Command.Suggestion;
 
 namespace Yggdrasilnet.Server.Core.Command.Commands;
 
@@ -11,8 +12,9 @@ public class SummonCommand : ICommand {
     /// <param name="x"></param>
     /// <param name="y"></param>
     /// <param name="z"></param>
-    [Command("summon", Permission = 2)]
-    public void Summon(CommandSource source, string entityType, float x = 0, float y = 0, float z = 0) {
+    [Command("summon", Permission = 0)]
+    public void Summon(CommandSource source, [Suggest(typeof(EntityTypeSuggestionProvider))] string entityType,
+        float x = 0, float y = 0, float z = 0) {
         var handle = source.Dimension.Spawn(entityType, new Vector3(x, y, z));
         source.SendFeedback($"Summoned {entityType} at ({x}, {y}, {z}) with id {handle.UniqueId}.");
     }
