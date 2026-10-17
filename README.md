@@ -50,19 +50,3 @@ dotnet run --project Yggdrasilnet.Server.csproj
 ```
 
 The server listens on UDP port `9050` by default.
-
-## 🤝 Contributors
-
-Thanks to the following people who have contributed to this project:
-
-<table align="left">
-  <tr>
-    <td align="center">
-      <a href="https://github.com/natof">
-        <img src="https://wsrv.nl/?url=https://avatars.githubusercontent.com/u/80003956&w=120&h=120&fit=cover&mask=roundrect" width="90" alt="Natof" />
-      </a>
-      <br />
-      <b>Natof</b>
-    </td>
-  </tr>
-</table>

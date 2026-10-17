@@ -66,7 +66,7 @@ public sealed class ServerTransport() : INetEventListener {
             throw new InvalidOperationException($"Unable to bind UDP server on port {port}.");
         }
 
-        Log.Information("Server listening on port {Port}", port);
+        Log.Information("[Server] Listening on port {Port}", port);
     }
 
     /// <summary>

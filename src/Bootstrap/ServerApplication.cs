@@ -111,12 +111,12 @@ public sealed class ServerApplication : IDisposable {
     ///     Starts all registered services.
     /// </summary>
     private void StartServices() {
-        Log.Information("Starting server application...");
+        Log.Information("[Server] Starting server application...");
 
         foreach (var service in _services)
             service.Start();
 
-        Log.Information("Server application started. Press Ctrl+C to stop.");
+        Log.Information("[Server] Server application started. Press Ctrl+C to stop.");
     }
 
     /// <summary>

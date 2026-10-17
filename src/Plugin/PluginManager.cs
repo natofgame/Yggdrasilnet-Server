@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Serilog;
+using Yggdrasilnet.Server.Bootstrap;
 
 namespace Yggdrasilnet.Server.Plugin;
 
@@ -24,7 +25,7 @@ public class PluginManager(Bootstrap.Server server) {
         var dir = Path.GetFullPath(PluginsDirector);
         if (!Directory.Exists(dir)) {
             Directory.CreateDirectory(dir);
-            Log.Information("[Plugin] No plugin directory found, created:" + dir);
+            Log.Information("[Plugin] No plugin directory found, created: {Directory}", dir);
             return;
         }
  
@@ -67,7 +68,7 @@ public class PluginManager(Bootstrap.Server server) {
             }
         }
         catch (Exception ex) {
-            Log.Error(ex, "Échec du chargement de {File}", Path.GetFileName(fullPath));
+            Log.Error(ex, "[Plugin] Failed to load {File}", Path.GetFileName(fullPath));
             context?.Unload();
         }
     }
@@ -81,29 +82,60 @@ public class PluginManager(Bootstrap.Server server) {
     /// <returns></returns>
     private bool TryLoadType(Type type, PluginContext context, string path) {
         try {
+            var meta = type.GetCustomAttribute<PluginAttribute>();
+            if (!IsCompatible(type, meta)) {
+                return false;
+            }
+
             if (Activator.CreateInstance(type) is not IYggdrasilPlugin instance) {
                 return false;
             }
- 
+
             if (_plugins.Any(p => p.Instance.Id == instance.Id)) {
-                Log.Error("[Plugin] Plugin already loaded : {Id}", instance.Id);
+                Log.Error("[Plugin] Plugin already loaded: {Id}", instance.Id);
                 return false;
             }
- 
-            var meta = type.GetCustomAttribute<PluginAttribute>();
+
             instance.OnLoad(server);
             _plugins.Add(new Plugin(instance, context, path));
  
-            Log.Information("Plugin loaded : {Name} v{Version} by {Author}",
+            Log.Information("[Plugin] Plugin loaded: {Name} v{Version} by {Author}",
                 meta?.Name ?? instance.Id, meta?.Version ?? "?", meta?.Author ?? "Unknown");
             return true;
         }
         catch (Exception ex) {
-            Log.Error(ex, "[Plugin] Error loading plugin : {Type}", type.FullName ?? "Unknown");
+            Log.Error(ex, "[Plugin] Error loading plugin: {Type}", type.FullName ?? "Unknown");
             return false;
         }
     }
     
+    /// <summary>
+    ///  Checks that the running server satisfies the Yggdrasil version required by the plugin.
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="meta"></param>
+    /// <returns></returns>
+    public static bool IsCompatible(Type type, PluginAttribute? meta) {
+        var name = meta?.Name ?? type.FullName ?? type.Name;
+        if (meta?.YggdrasilVersion is null) {
+            Log.Warning("[Plugin] {Name} does not declare a required Yggdrasil version", name);
+            return true;
+        }
+
+        if (!ServerVersion.TryParse(meta.YggdrasilVersion, out var required)) {
+            Log.Error("[Plugin] {Name} declares an invalid Yggdrasil version: {Version}", name, meta.YggdrasilVersion);
+            return false;
+        }
+
+        if (ServerVersion.Numeric < required) {
+            Log.Error("[Plugin] {Name} requires Yggdrasil {Required} or newer (server is {Current})",
+                name, meta.YggdrasilVersion, ServerVersion.Current);
+            return false;
+        }
+
+        return true;
+    }
+
     /// <summary>
     ///  Enable all plugins.
     /// </summary>
@@ -116,10 +148,10 @@ public class PluginManager(Bootstrap.Server server) {
         try {
             plugin.Instance.OnEnable(server);
             plugin.Enabled = true;
-            Log.Information("[Plugin] Plugin enabled : {Name}", plugin.Instance.Id);
+            Log.Information("[Plugin] Plugin enabled: {Name}", plugin.Instance.Id);
         }
         catch (Exception ex) {
-            Log.Error(ex, "[Plugin] Error activating plugin : {Name}", plugin.Instance.Id);
+            Log.Error(ex, "[Plugin] Error activating plugin: {Name}", plugin.Instance.Id);
         }
     }
 
@@ -160,7 +192,7 @@ public class PluginManager(Bootstrap.Server server) {
             plugin.Instance.OnDisable(server);
         }
         catch (Exception ex) {
-            Log.Error(ex, "[Plugin] Error disabling plugin : {Name}", plugin.Instance.Id);
+            Log.Error(ex, "[Plugin] Error disabling plugin: {Name}", plugin.Instance.Id);
         }
         finally {
             plugin.Enabled = false;

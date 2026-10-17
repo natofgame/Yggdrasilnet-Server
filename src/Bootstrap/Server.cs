@@ -58,7 +58,7 @@ public sealed class Server(int port, int tickRate, SnapshotConfiguration snapsho
         
         _server.Start(port);
         Plugins.EnableAll();
-        Log.Information("Game loop running at {TickRate} tps", tickRate);
+        Log.Information("[Server] Game loop running at {TickRate} tps", tickRate);
 
         _runCts = new CancellationTokenSource();
 
