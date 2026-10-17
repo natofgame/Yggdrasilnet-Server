@@ -3,6 +3,7 @@ using LiteNetLib;
 using Serilog;
 using Yggdrasilnet.NetworkV4.Chat;
 using Yggdrasilnet.NetworkV4.Protocol;
+using Yggdrasilnet.Server.Configuration;
 using Yggdrasilnet.Server.Core.Behavior.Registry;
 using Yggdrasilnet.Server.Core.Command;
 using Yggdrasilnet.Server.Core.Registry;
@@ -29,7 +30,8 @@ public sealed class Simulation {
 
     private readonly SnapshotBroadcaster _snapshotBroadcaster;
  
-    public Simulation(Bootstrap.Server server, ConcurrentQueue<IServerEvent> events, ServerTransport transport, int tickRate) {
+    public Simulation(Bootstrap.Server server, ConcurrentQueue<IServerEvent> events, ServerTransport transport, int tickRate,
+        SnapshotConfiguration snapshotConfiguration) {
         _events = events;
 
         World = CreateWorld();
@@ -40,7 +42,8 @@ public sealed class Simulation {
         _players = new PlayerService(Server, World, Network, EntityRegistry);
         Chat = new ChatService(Network, _sessions);
 
-        _snapshotBroadcaster = new SnapshotBroadcaster(_sessions, World, this, tickRate);
+        _snapshotBroadcaster = new SnapshotBroadcaster(_sessions, World, this, new SnapshotBuilder(EntityRegistry),
+            snapshotConfiguration, tickRate);
         CommandRegistry.Registers(CommandFactory, World);
     }
 

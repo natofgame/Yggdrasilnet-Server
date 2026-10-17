@@ -1,4 +1,8 @@
 {
   "port": 9050,
-  "tickRate": 30
+  "tickRate": 30,
+  "snapshot": {
+    "chunkTargetBytes": 1000,
+    "keyframeIntervalSeconds": 1
+  }
 }

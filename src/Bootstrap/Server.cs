@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using Serilog;
 using Yggdrasilnet.NetworkV4.Protocol;
+using Yggdrasilnet.Server.Configuration;
 using Yggdrasilnet.Server.Core;
 using Yggdrasilnet.Server.Core.Command;
 using Yggdrasilnet.Server.Event;
@@ -12,7 +13,7 @@ namespace Yggdrasilnet.Server.Bootstrap;
 /// <summary>
 ///     Hosts the game server as a managed application service.
 /// </summary>
-public sealed class Server(int port, int tickRate) : IHostedService, IDisposable, IServer {
+public sealed class Server(int port, int tickRate, SnapshotConfiguration snapshotConfiguration) : IHostedService, IDisposable, IServer {
     private readonly ConcurrentQueue<IServerEvent> _events = new();
     private Thread? _consoleThread;
     private bool _disposed;
@@ -49,7 +50,7 @@ public sealed class Server(int port, int tickRate) : IHostedService, IDisposable
         ProtocolRegistry.Registers();
 
         _server = new ServerTransport(_events);
-        Simulation = new Simulation(this, _events, _server, tickRate);
+        Simulation = new Simulation(this, _events, _server, tickRate, snapshotConfiguration);
         _loop = new GameLoop(_server, Simulation, tickRate);
 
         Plugins = new PluginManager(this);

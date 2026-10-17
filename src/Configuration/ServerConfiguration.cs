@@ -6,4 +6,6 @@ public sealed class ServerConfiguration {
     [JsonPropertyName("port")] public int Port { get; set; } = 9050;
 
     [JsonPropertyName("tickRate")] public int TickRate { get; set; } = 30;
+
+    [JsonPropertyName("snapshot")] public SnapshotConfiguration Snapshot { get; set; } = new();
 }
