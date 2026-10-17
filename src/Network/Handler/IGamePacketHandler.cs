@@ -1,4 +1,5 @@
 using Yggdrasilnet.NetworkV4.Packets;
+using Yggdrasilnet.NetworkV4.Packets.Login;
 
 namespace Yggdrasilnet.Server.Network.Handler;
 
@@ -35,4 +36,22 @@ public interface IGamePacketHandler {
     /// </summary>
     /// <param name="packet"></param>
     void Handle(CommandPacket packet);
+
+    /// <summary>
+    ///  Handles a chat packet.
+    /// </summary>
+    /// <param name="packet"></param>
+    void Handle(ChatPacket packet);
+
+    /// <summary>
+    ///  Handles a login packet.
+    /// </summary>
+    /// <param name="packet"></param>
+    void Handle(LoginPacket packet);
+
+    /// <summary>
+    ///  Handles a command suggestion request packet.
+    /// </summary>
+    /// <param name="packet"></param>
+    void Handle(CommandSuggestionRequestPacket packet);
 }

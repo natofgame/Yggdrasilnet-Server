@@ -39,6 +39,11 @@ public sealed class BehaviorPackRegistry(EntityComponentRegistry entityComponent
     public int SpellBehaviorCount => _spellDefinitions.Count;
 
     /// <summary>
+    ///     The ids of the entity definitions loaded.
+    /// </summary>
+    public IEnumerable<string> EntityIds => _entityDefinitions.Keys;
+
+    /// <summary>
     ///     Tries to get a behavior definition by its ID.
     /// </summary>
     /// <param name="definitionId"></param>

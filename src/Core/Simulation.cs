@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using LiteNetLib;
 using Serilog;
+using Yggdrasilnet.NetworkV4.Chat;
 using Yggdrasilnet.NetworkV4.Protocol;
 using Yggdrasilnet.Server.Core.Behavior.Registry;
 using Yggdrasilnet.Server.Core.Command;
@@ -37,6 +38,7 @@ public sealed class Simulation {
         Network = new NetworkService(transport);
         EntityRegistry = new EntityRegistry(this);
         _players = new PlayerService(Server, World, Network, EntityRegistry);
+        Chat = new ChatService(Network, _sessions);
 
         _snapshotBroadcaster = new SnapshotBroadcaster(_sessions, World, this, tickRate);
         CommandRegistry.Registers(CommandFactory, World);
@@ -46,6 +48,11 @@ public sealed class Simulation {
     ///     The command factory.
     /// </summary>
     public CommandFactory CommandFactory { get; } = new();
+
+    /// <summary>
+    ///     The chat service.
+    /// </summary>
+    public ChatService Chat { get; }
 
     /// <summary>
     ///     The entity registry.
@@ -122,7 +129,7 @@ public sealed class Simulation {
         var source = new CommandSource {
             Dimension = World.MainDimension,
             PermissionLevel = int.MaxValue,
-            SendFeedback = message => Log.Information("{Message}", message)
+            SendFeedback = message => Log.Information("{Message}", ChatFormatting.StripCodes(message))
         };
 
         CommandFactory.Execute(input, source);
@@ -153,13 +160,15 @@ public sealed class Simulation {
 
         // TODO: Handle disconnection gracefully
         if (session.TryGetEntityBinding(out var entityId, out var dimensionName)) {
-            if (World.TryResolveEntity(entityId, out var entity) && entity is Player player) {
-                Server.Event.Publish(new PlayerLeaveEvent(player));
+            if (World.TryResolveEntity(entityId, out var entity) && entity is not null) {
+                Server.Event.Publish(new PlayerLeaveEvent(entity.ToPlayer()));
             }
 
             World.TryDespawn(dimensionName, entityId);
             session.ClearEntityBinding();
         }
+
+        _players.ReleaseName(session);
 
         Log.Information("Peer disconnected: {EndPoint} ({Reason})", peer.Address, info.Reason);
     }

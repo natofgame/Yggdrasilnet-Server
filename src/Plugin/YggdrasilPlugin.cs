@@ -7,9 +7,10 @@ public abstract class YggdrasilPlugin : IYggdrasilPlugin {
     ///  The metadata of the plugin.
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
-    private PluginAttribute Metadata => field ??=
+    public PluginAttribute Metadata => field ??=
         GetType().GetCustomAttribute<PluginAttribute>()
-        ?? throw new InvalidOperationException("Plugin metadata not found.");
+        ?? throw new InvalidOperationException(
+            $"Le plugin {GetType().FullName} doit être décoré avec [Plugin(\"id\")].");
 
     /// <inheritdoc/>
     public string Id => Metadata.Id;
@@ -20,5 +21,6 @@ public abstract class YggdrasilPlugin : IYggdrasilPlugin {
     /// <inheritdoc/>
     public virtual void OnEnable(Bootstrap.Server server) { }
     
+    /// <inheritdoc/>
     public virtual void OnDisable(Bootstrap.Server server) { }
 }

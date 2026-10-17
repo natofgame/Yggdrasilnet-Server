@@ -1,4 +1,5 @@
 using Yggdrasilnet.NetworkV4.Packets;
+using Yggdrasilnet.NetworkV4.Packets.Login;
 
 namespace Yggdrasilnet.Server.Network.Handler;
 
@@ -20,4 +21,13 @@ public abstract class AbstractGamePacketHandler : IGamePacketHandler {
 
     /// <inheritdoc />
     public virtual void Handle(CommandPacket packet) { }
+    
+    /// <inheritdoc />
+    public virtual void Handle(ChatPacket packet) { }
+    
+    /// <inheritdoc />
+    public virtual void Handle(LoginPacket packet) { }
+
+    /// <inheritdoc />
+    public virtual void Handle(CommandSuggestionRequestPacket packet) { }
 }
