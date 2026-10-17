@@ -1,5 +1,5 @@
 using System.Numerics;
-using Yggdrasilnet.NetworkV4.Packets;
+using Yggdrasilnet.Network.Packets;
 using Yggdrasilnet.Server.Core.Registry;
 using Yggdrasilnet.Server.Core.World;
 using Yggdrasilnet.Server.Core.World.Entities.Components;

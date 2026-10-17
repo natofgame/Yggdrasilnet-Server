@@ -1,8 +1,8 @@
 using System.Numerics;
 using System.Text;
-using Yggdrasilnet.NetworkV4.Enums;
-using Yggdrasilnet.NetworkV4.Snapshot;
-using Yggdrasilnet.NetworkV4.Snapshot.Components;
+using Yggdrasilnet.Network.Enums;
+using Yggdrasilnet.Network.Snapshot;
+using Yggdrasilnet.Network.Snapshot.Components;
 using Yggdrasilnet.Server.Core.Registry;
 using Yggdrasilnet.Server.Core.World.Dimensions;
 using Yggdrasilnet.Server.Core.World.Entities;
@@ -11,7 +11,7 @@ using Yggdrasilnet.Server.Core.World.Entities.Components.Combat;
 using Yggdrasilnet.Server.Core.World.Entities.Components.Living;
 using Yggdrasilnet.Server.Core.World.Entities.Components.Movement;
 using Yggdrasilnet.Server.Core.World.Entities.Components.Projectile;
-using TargetComponent = Yggdrasilnet.NetworkV4.Snapshot.Components.TargetComponent;
+using TargetComponent = Yggdrasilnet.Network.Snapshot.Components.TargetComponent;
 using WorldCollisionComponent = Yggdrasilnet.Server.Core.World.Entities.Components.Collision.CollisionComponent;
 using WorldTargetComponent = Yggdrasilnet.Server.Core.World.Entities.Components.TargetComponent;
 

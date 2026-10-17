@@ -1,7 +1,7 @@
 using LiteNetLib;
 using Serilog;
-using Yggdrasilnet.NetworkV4.Packets;
-using Yggdrasilnet.NetworkV4.Snapshot;
+using Yggdrasilnet.Network.Packets;
+using Yggdrasilnet.Network.Snapshot;
 using Yggdrasilnet.Server.Configuration;
 using Yggdrasilnet.Server.Core;
 using Yggdrasilnet.Server.Core.World;

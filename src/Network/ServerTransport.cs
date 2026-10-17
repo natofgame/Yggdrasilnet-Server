@@ -4,8 +4,8 @@ using System.Net.Sockets;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using Serilog;
-using Yggdrasilnet.NetworkV4.Codec;
-using Yggdrasilnet.NetworkV4.Protocol;
+using Yggdrasilnet.Network.Codec;
+using Yggdrasilnet.Network.Protocol;
 
 namespace Yggdrasilnet.Server.Network;
 

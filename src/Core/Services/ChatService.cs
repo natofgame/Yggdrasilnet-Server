@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Serilog;
-using Yggdrasilnet.NetworkV4.Chat;
-using Yggdrasilnet.NetworkV4.Packets;
+using Yggdrasilnet.Network.Chat;
+using Yggdrasilnet.Network.Packets;
 using Yggdrasilnet.Server.Network.Services;
 using Yggdrasilnet.Server.Network.Session;
 

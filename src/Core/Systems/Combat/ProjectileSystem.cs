@@ -1,6 +1,6 @@
 using System.Numerics;
 using Yggdrasilnet.Maths.Collision;
-using Yggdrasilnet.NetworkV4.Enums;
+using Yggdrasilnet.Network.Enums;
 using Yggdrasilnet.Server.Core.Behavior.Models;
 using Yggdrasilnet.Server.Core.Behavior.Registry;
 using Yggdrasilnet.Server.Core.Systems.Physics.Steering;

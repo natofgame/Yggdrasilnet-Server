@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 using Serilog;
-using Yggdrasilnet.NetworkV4.Protocol;
+using Yggdrasilnet.Network.Protocol;
 using Yggdrasilnet.Server.Configuration;
 using Yggdrasilnet.Server.Core;
 using Yggdrasilnet.Server.Core.Command;

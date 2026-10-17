@@ -1,6 +1,6 @@
 using LiteNetLib;
-using Yggdrasilnet.NetworkV4.Codec;
-using Yggdrasilnet.NetworkV4.Protocol;
+using Yggdrasilnet.Network.Codec;
+using Yggdrasilnet.Network.Protocol;
 using Yggdrasilnet.Server.Network.Handler;
 
 namespace Yggdrasilnet.Server.Network.Session;

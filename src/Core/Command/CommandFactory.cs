@@ -1,5 +1,5 @@
 using System.Reflection;
-using Yggdrasilnet.NetworkV4.Chat;
+using Yggdrasilnet.Network.Chat;
 using Yggdrasilnet.Server.Core.Command.Suggestion;
 
 namespace Yggdrasilnet.Server.Core.Command;

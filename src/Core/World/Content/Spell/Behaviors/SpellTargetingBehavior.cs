@@ -1,5 +1,5 @@
 using System.Numerics;
-using Yggdrasilnet.NetworkV4.Enums;
+using Yggdrasilnet.Network.Enums;
 using Yggdrasilnet.Server.Core.Behavior.Core;
 using Yggdrasilnet.Server.Core.World.Dimensions;
 using Yggdrasilnet.Server.Core.World.Entities.Components.Collision;

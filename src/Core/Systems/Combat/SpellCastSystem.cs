@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using Yggdrasilnet.NetworkV4.Enums;
+using Yggdrasilnet.Network.Enums;
 using Yggdrasilnet.Server.Core.Behavior.Models;
 using Yggdrasilnet.Server.Core.Behavior.Registry;
 using Yggdrasilnet.Server.Core.World.Content.Spell;
@@ -15,7 +15,7 @@ using Yggdrasilnet.Server.Core.World.Entities.Components.Combat;
 using Yggdrasilnet.Server.Core.World.Entities.Components.Living;
 using Yggdrasilnet.Server.Core.World.Entities.Components.Movement;
 using Yggdrasilnet.Server.Core.World.Entities.Components.Projectile;
-using CollisionLayer = Yggdrasilnet.NetworkV4.Enums.CollisionLayer;
+using CollisionLayer = Yggdrasilnet.Network.Enums.CollisionLayer;
 
 namespace Yggdrasilnet.Server.Core.Systems.Combat;
 

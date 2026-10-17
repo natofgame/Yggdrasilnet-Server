@@ -1,4 +1,4 @@
-using Yggdrasilnet.NetworkV4.Enums;
+using Yggdrasilnet.Network.Enums;
 
 namespace Yggdrasilnet.Server.Core.World.Entities.Components.Collision;
 

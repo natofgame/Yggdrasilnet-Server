@@ -1,8 +1,8 @@
 using System.Collections.Concurrent;
 using LiteNetLib;
 using Serilog;
-using Yggdrasilnet.NetworkV4.Chat;
-using Yggdrasilnet.NetworkV4.Protocol;
+using Yggdrasilnet.Network.Chat;
+using Yggdrasilnet.Network.Protocol;
 using Yggdrasilnet.Server.Configuration;
 using Yggdrasilnet.Server.Core.Behavior.Registry;
 using Yggdrasilnet.Server.Core.Command;

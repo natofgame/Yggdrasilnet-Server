@@ -1,4 +1,4 @@
-using Yggdrasilnet.NetworkV4.Packets;
+using Yggdrasilnet.Network.Packets;
 using Yggdrasilnet.Server.Network.Session;
 
 namespace Yggdrasilnet.Server.Core.Registry;

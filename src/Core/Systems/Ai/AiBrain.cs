@@ -1,6 +1,6 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using Yggdrasilnet.NetworkV4.Enums;
+using Yggdrasilnet.Network.Enums;
 using Yggdrasilnet.Server.Core.Systems.Ai.Behaviors;
 using Yggdrasilnet.Server.Core.Systems.Combat;
 using Yggdrasilnet.Server.Core.World.Dimensions;
