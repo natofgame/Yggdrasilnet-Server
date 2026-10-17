@@ -24,13 +24,21 @@ connected clients. It operates on an authoritative model to ensure game integrit
 
 ## 🗂️ Project Structure
 
-- 📦 `BehaviorPack/`: JSON definitions for entities and spells.
 - 🏁 `src/Bootstrap/`: Application entry, hosted services, and game loop.
 - 🔧 `src/Configuration/`: Server configuration models and loader.
 - 🧠 `src/Core/`: Simulation logic (behaviors, commands, events, systems, world).
 - 🌐 `src/Network/`: Transport, sessions, packet handlers, and snapshot broadcasting.
 
 ## 🚀 Usage
+
+### 📥 Setup
+
+The server depends on sibling repositories (`Yggdrasilnet.Maths`, `Yggdrasilnet.Network` and
+`Yggdrasilnet.Gameplay`, which holds the behavior packs). Clone or update them all, then build:
+
+```bash
+./setup.sh [branch]
+```
 
 ### 🔨 Build
 

@@ -26,7 +26,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include="BehaviorPack\**\*.json">
+        <Content Include="..\Yggdrasilnet.Gameplay\**\*.json" Exclude="..\Yggdrasilnet.Gameplay\.git\**">
+            <Link>BehaviorPack\%(RecursiveDir)%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
