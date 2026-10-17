@@ -34,11 +34,8 @@ connected clients. It operates on an authoritative model to ensure game integrit
 ### 📥 Setup
 
 The server depends on sibling repositories (`Yggdrasilnet.Maths`, `Yggdrasilnet.Network` and
-`Yggdrasilnet.Gameplay`, which holds the behavior packs). Clone or update them all, then build:
-
-```bash
-./setup.sh [branch]
-```
+`Yggdrasilnet.Gameplay`, which holds the behavior packs). To set everything up for plugin development, use the
+[Yggdrasil Installer](https://github.com/natofgame/Yggdrasil.Installer).
 
 ### 🔨 Build
 
