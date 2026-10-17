@@ -5,5 +5,6 @@
 /// </summary>
 public enum ConnectionPhase {
     Handshake,
+    Login,
     Game
 }

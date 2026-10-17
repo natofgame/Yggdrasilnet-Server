@@ -1,6 +1,7 @@
 using LiteNetLib;
 using Serilog;
 using Yggdrasilnet.NetworkV4.Packets;
+using Yggdrasilnet.NetworkV4.Packets.Login;
 using Yggdrasilnet.NetworkV4.Protocol;
 using Yggdrasilnet.Server.Network.Handler;
 using Yggdrasilnet.Server.Network.Session;
@@ -69,6 +70,15 @@ public sealed class NetworkService(ServerTransport server) {
                 break;
             case CommandPacket command:
                 handler.Handle(command);
+                break;
+            case ChatPacket chat:
+                handler.Handle(chat);
+                break;
+            case LoginPacket loginPacket:
+                handler.Handle(loginPacket);
+                break;
+            case CommandSuggestionRequestPacket suggestionRequest:
+                handler.Handle(suggestionRequest);
                 break;
         }
     }

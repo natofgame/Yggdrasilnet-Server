@@ -19,11 +19,12 @@ public sealed class HandshakeHandler(
     GameSession session,
     NetworkService network,
     PlayerService playerService) : AbstractGamePacketHandler {
+    
     /// <inheritdoc />
     public override void Handle(RequestProtocolPacket packet) {
         if (!network.TrySelectProtocol(session, packet.ProtocolVersion)) {
-            Log.Warning("Unsupported protocol {ProtocolVersion} from {EndPoint}", packet.ProtocolVersion,
-                session.Peer.Address);
+            Log.Warning("Unsupported protocol {ProtocolVersion} from {EndPoint}",
+                packet.ProtocolVersion, session.Peer.Address);
             network.Disconnect(session);
             return;
         }
@@ -32,12 +33,10 @@ public sealed class HandshakeHandler(
             ProtocolVersion = session.Codec.Protocol.ProtocolVersion
         });
 
-        playerService.EnterGame(session);
-        session.SetHandler(new GameHandler(runtime, session, playerService));
-        Log.Information("Handshake completed with {EndPoint} using protocol v{ProtocolVersion}",
-            session.Peer.Address, session.Codec.Protocol.ProtocolVersion);
+        session.SetPhase(ConnectionPhase.Login);
+        session.SetHandler(new LoginHandler(runtime, session, network, playerService));
     }
-
+    
     /// <inheritdoc />
     public override void Handle(InputPacket packet) {
         Log.Debug("Input ignored for {EndPoint} because handshake is not completed.", session.Peer.Address);

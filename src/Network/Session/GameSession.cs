@@ -58,6 +58,11 @@ public sealed class GameSession(NetPeer peer, GameProtocol protocol) {
     ///     The dimension the entity is in.
     /// </summary>
     public string DimensionName { get; private set; } = DefaultDimensionName;
+    
+    /// <summary>
+    ///  The profile of the session.
+    /// </summary>
+    public PlayerProfile? Profile { get; private set; }
 
     /// <summary>
     ///     Sets the packet handler for this session.
@@ -146,5 +151,21 @@ public sealed class GameSession(NetPeer peer, GameProtocol protocol) {
     private static bool IsNewer(uint candidate, uint current) {
         var diff = candidate - current;
         return diff != 0 && diff < 0x80000000;
+    }
+    
+    /// <summary>
+    ///  Sets the phase of the connection.
+    /// </summary>
+    /// <param name="phase"></param>
+    public void SetPhase(ConnectionPhase phase) {
+        Phase = phase;
+    }
+
+    /// <summary>
+    ///    Sets the profile of the session.
+    /// </summary>
+    /// <param name="profile"></param>
+    public void SetProfile(PlayerProfile profile) {
+        Profile = profile;
     }
 }

@@ -2,6 +2,7 @@ using System.Numerics;
 using Yggdrasilnet.NetworkV4.Packets;
 using Yggdrasilnet.Server.Core.Registry;
 using Yggdrasilnet.Server.Core.World;
+using Yggdrasilnet.Server.Core.World.Entities.Components;
 using Yggdrasilnet.Server.Event.Events.Player;
 using Yggdrasilnet.Server.Network.Services;
 using Yggdrasilnet.Server.Network.Session;
@@ -20,6 +21,33 @@ public sealed class PlayerService(
     NetworkService network,
     EntityRegistry entityRegistry) {
     
+    private readonly Dictionary<string, GameSession> _names = new(StringComparer.OrdinalIgnoreCase);
+    
+    public bool TryLogin(GameSession session, string? requestedName, out string error) {
+        if (!Utils.PlayerNameValidator.TryNormalize(requestedName, out var name, out error)) {
+            return false;
+        }
+
+        if (!_names.TryAdd(name, session)) {
+            error = "Name already in use.";
+            return false;
+        }
+
+        session.SetProfile(new PlayerProfile(Guid.NewGuid(), name));
+        return true;
+    }
+    
+    /// <summary>
+    ///     Frees the name reserved by the given session, if it still owns it.
+    /// </summary>
+    public void ReleaseName(GameSession session) {
+        if (session.Profile is { } profile
+            && _names.TryGetValue(profile.Name, out var owner)
+            && ReferenceEquals(owner, session)) {
+            _names.Remove(profile.Name);
+        }
+    }
+    
     /// <summary>
     ///     Creates a new player entity and binds it to the given session.
     /// </summary>
@@ -28,8 +56,11 @@ public sealed class PlayerService(
         if (session.ControlledEntityId is not null) {
             return;
         }
-
-        var player = world.Spawn("player", Vector3.Zero).ToPlayer();
+        
+        var spawned = world.Spawn("player", Vector3.Zero);
+        spawned.Set(new NameComponent { Value = session.Profile!.Name });
+        var player = spawned.ToPlayer();
+        
         session.BindEntity(player.UniqueId, world.MainDimension.Id);
         session.MarkReady();
 
@@ -63,7 +94,15 @@ public sealed class PlayerService(
         if (!session.TryGetEntityBinding(out var entityId, out var dimensionName)) {
             return;
         }
+        if (!float.IsFinite(x) || !float.IsFinite(z)) {
+            return;
+        }
 
-        world.TrySetInput(dimensionName, entityId, x, z);
+        var dir = new Vector2(x, z);
+        if (dir.LengthSquared() > 1f) {
+            dir = Vector2.Normalize(dir);
+        }
+
+        world.TrySetInput(dimensionName, entityId, dir.X, dir.Y);
     }
 }
